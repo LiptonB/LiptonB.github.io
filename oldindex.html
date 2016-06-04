@@ -1,0 +1,59 @@
+---
+title: Ben Lipton's blog
+---
+
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <!-- <meta http-equiv="X-UA-Compatible" content="chrome=1"> -->
+    <meta name="description" content="Ben Lipton&#39;s blog : Putting stuff where I can find it later">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Ben Lipton&#39;s blog</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <h1 id="project_title">Ben Lipton&#39;s blog</h1>
+          <h2 id="project_tagline">Putting stuff where I can find it later</h2>
+
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="hello-there" class="anchor" href="#hello-there" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Hello there.</h1>
+
+<p>This summer I'm going to be doing some work on the <a href="https://www.freeipa.org/">FreeIPA</a> project, and I will use this space to talk about some of what I'm doing and write down things I've figured out. Hopefully they will be useful to somebody, or at least to me when I forget them later.</p>
+      </section>
+
+      <section id="post_list" class="inner">
+				<h2>Posts</h2>
+				<ul>
+					{% for post in site.posts %}
+						<li>
+							<a href="{{ post.url }}">{{ post.title }}</a>
+						</li>
+					{% endfor %}
+				</ul>
+			</section>
+
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p><a href="https://www.github.com/LiptonB">Published</a> with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+  </body>
+</html>

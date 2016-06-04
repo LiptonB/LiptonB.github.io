@@ -1,0 +1,82 @@
+git clone git://git.fedorahosted.org/git/freeipa.git
+cp freeipa.spec.in freeipa-builddep.spec
+sudo dnf builddep --spec freeipa.spec.in
+scp dist/rpms/*.rpm <server>:rpms/
+
+ssh server
+cd rpms
+sudo dnf copr enable @freeipa/freeipa-master
+sudo dnf install *.rpm
+ipa-server-install --setup-dns --auto-resolvers
+
+Server host name [vm-166.abc.idm.lab.eng.brq.redhat.com]:
+
+Warning: skipping DNS resolution of host vm-166.abc.idm.lab.eng.brq.redhat.com
+The domain name has been determined based on the host name.
+
+Please confirm the domain name [abc.idm.lab.eng.brq.redhat.com]: dom-166.abc.idm.lab.eng.brq.redhat.com
+
+The kerberos protocol requires a Realm name to be defined.
+This is typically the domain name converted to uppercase.
+
+Please provide a realm name [DOM-166.ABC.IDM.LAB.ENG.BRQ.REDHAT.COM]:
+Certain directory server operations require an administrative user.
+This user is referred to as the Directory Manager and has full access
+to the Directory for system management tasks and will be added to the
+instance of directory server created for IPA.
+The password must be at least 8 characters long.
+
+Directory Manager password:
+Password (confirm):
+
+The IPA server requires an administrative user, named 'admin'.
+This user is a regular system account used for IPA server administration.
+
+IPA admin password:
+Password (confirm):
+
+Checking DNS domain dom-166.abc.idm.lab.eng.brq.redhat.com., please wait ...
+Checking DNS forwarders, please wait ...
+Do you want to search for missing reverse zones? [yes]:
+
+<wait for install>
+
+bash-4.3$ ipa user-add
+ipa: ERROR: ImportError: No module named 'usb'
+Traceback (most recent call last):
+  File "/usr/lib/python3.4/site-packages/ipalib/cli.py", line 1345, in run
+    api.finalize()
+  File "/usr/lib/python3.4/site-packages/ipalib/plugable.py", line 629, in finalize
+    self.__do_if_not_done('load_plugins')
+  File "/usr/lib/python3.4/site-packages/ipalib/plugable.py", line 350, in __do_if_not_done
+    getattr(self, name)()
+  File "/usr/lib/python3.4/site-packages/ipalib/plugable.py", line 514, in load_plugins
+    self.add_package(package)
+  File "/usr/lib/python3.4/site-packages/ipalib/plugable.py", line 541, in add_package
+    module = importlib.import_module(name)
+  File "/usr/lib64/python3.4/importlib/__init__.py", line 109, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 2254, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 2237, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 2226, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1200, in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1129, in _exec
+  File "<frozen importlib._bootstrap>", line 1471, in exec_module
+  File "<frozen importlib._bootstrap>", line 321, in _call_with_frames_removed
+  File "/usr/lib/python3.4/site-packages/ipalib/plugins/otptoken_yubikey.py", line 23, in <module>
+    import usb.core
+ImportError: No module named 'usb'
+ipa: ERROR: an internal error has occurred
+
+Fix with: dnf install python3-pyusb
+OR:
+git checkout -b pyusb-fix
+git am ~/Downloads/freeipa-slaznick-0035-Added-pyusb-as-a-dependency.patch
+rebuild, reupload, upgrade
+
+Client install:
+ipa config-mod --homedirectory /localhome
+ipa-client-install --domain dom-166.abc.idm.lab.eng.brq.redhat.com
+authconfig --enablemkhomedir
+Homedirs are on an NFS volume: comment out line in /etc/auto.master
+
