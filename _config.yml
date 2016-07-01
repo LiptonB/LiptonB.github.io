@@ -16,3 +16,5 @@ github_username: LiptonB
 
 # Build settings
 markdown: kramdown
+gems:
+  - jekyll-feed
