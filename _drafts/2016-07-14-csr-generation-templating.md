@@ -5,6 +5,10 @@ highlighter: rouge
 tags: freeipa
 ---
 
+## Contents
+* TOC
+{:toc}
+
 ## Background
 I am working on a project
 ([ticket](https://fedorahosted.org/freeipa/ticket/4899),
@@ -36,7 +40,7 @@ be added at runtime, so these rules must be text-based rather than part of the
 code. This post will try to imagine what the rules would look like if
 implemented using the [Jinja2](http://jinja2.pocoo.org/) templating language.
 
-## Requirements
+### Requirements
 We must at a minimum be able to generate two different types of configuration,
 the openssl config file:
 
@@ -133,7 +137,7 @@ Example syntax rules:
 ```
 
 ```
-subjectAltName={{{% endraw %}{% raw %}'{% section %}'}}{{values|join('\n')}}{{{% endraw %}{% raw %}'{% endsection %}'}}
+subjectAltName=@{{{% endraw %}{% raw %}'{% section %}'}}{{values|join('\n')}}{{{% endraw %}{% raw %}'{% endsection %}'}}
 ```
 {% endraw %}
 
@@ -143,7 +147,7 @@ something like:
 
 {% raw %}
 ```
-subjectAltName={% section %}email={{subject.email}}
+subjectAltName=@{% section %}email={{subject.email}}
 URI={{subject.inetuserhttpurl}}{% endsection %}
 ```
 {% endraw %}
@@ -174,7 +178,7 @@ example rules given above would still be valid, but the `values` would be the
 data rules themselves rather than data rules with interpolated user data. And
 of course, the `values` would not be escaped beforehand.
 
-### Flat template
+### Template-based hierarchical rules
 An option that takes us in a different direction is to redesign the template so
 that the order of its elements no longer matters. That is, the hierarchical
 relationships between data items, certificate extensions, and the CSR as a
@@ -184,10 +188,10 @@ idea with an example:
 {% highlight jinja %}
 {% raw %}
 {% group req %}
-{% entry req %}extensions={% group extn %}{% endentry %}
-{% entry req %}distinguished_name={% group DN %}{% endentry %}
-{% entry DN %}O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}{% endentry %}
-{% entry extn %}subjectAltName={% group SAN %}{% endentry %}
+{% entry req %}extensions={% group exts %}{% endentry %}
+{% entry req %}distinguished_name={% group subjectDN %}{% endentry %}
+{% entry subjectDN %}O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}{% endentry %}
+{% entry exts %}subjectAltName=@{% group SAN %}{% endentry %}
 {% entry SAN %}email={{subject.email}}{% endentry %}
 {% entry SAN %}URI={{subject.inetuserhttpurl}}{% endentry %}
 {% endraw %}
@@ -197,9 +201,9 @@ The config for certutil would be quite similar:
 {% highlight jinja %}
 {% raw %}
 certutil -R -a {% group opts %}
-{% entry opts %}-s {% group DN %}{% endentry %}
+{% entry opts %}-s {% group subjectDN %}{% endentry %}
 {% entry opts %}--extSAN {% group SAN %}{% endentry %}
-{% entry DN %}CN={{subject.username}},O={{config.ipacertificatesubjectbase}}{% endentry %}
+{% entry subjectDN %}CN={{subject.username}},O={{config.ipacertificatesubjectbase}}{% endentry %}
 {% entry SAN %}email:{{subject.email}}{% endentry %}
 {% entry SAN %}uri:{{subject.inetuserhttpurl}}{% endentry %}
 {% endraw %}
@@ -216,11 +220,87 @@ tags specified the hierarchy.
 
 This approach has some downsides, too:
 
-* Section names are now specified in the rules, which means there could be
-  conflicts between different rules.
-* Some types of groups are formatted differently from others (e.g. in certutil,
-  `opts` is space-separated, while `SAN` is comma-separated. It's not entirely
-  clear where this should be encoded, and how.
+1. Section names are now specified in the rules, which means there could be
+   conflicts between different rules, and that a rule can only ever be included
+   in a particular section. If two sections need the same data, two different
+   rules are needed.
+2. Some types of groups are formatted differently from others (e.g. in
+   certutil, `opts` is space-separated, while `SAN` is comma-separated. It's
+   not entirely clear where this should be encoded, and how.
+
+Concern #1 is probably an ok tradeoff, as it's not clear how broadly reusable
+rules will be anyway. However, #2 would need to be addressed in any actual
+implementation.
+
+### Formatter-based hierarchical rules
+Instead of linking rules together into a hierarchy using tags, leaving it to
+the templating engine to interpret that structure, we could encode the
+structure in the rule entities themselves and use multiple evaluations to
+handle the hierarchy in the formatter, before the data even gets to the
+templating engine. Each rule would be stored with the name of the group within
+which it should be rendered, as well as the names of any groups that the rule
+includes. For example, to adapt the rule
+`{% raw %}{% entry exts %}subjectAltName=@{% group SAN %}{% endentry %}{% endraw %}`
+to this schema, we would say that it is an element of the "exts" group,
+and provides the "SAN" group. By linking up group elements to group providers,
+we construct a tree of rules.
+
+The formatter would evaluate these rules beginning at the leaves and passing
+the results of child nodes into variables in the parent node templates. The
+formatter is responsible for determining what exactly gets passed into the
+parent node, such as an object representing an openssl config section, or just
+a list of formatted strings. Parent nodes decide how to present the passed
+objects, such as by comma-separating the strings or referencing the name of the
+section. This addresses concern #2 from the previous approach, because the
+tools of the jinja2 language are now available for expressing how to format the
+results of groups of rules.
+
+Example leaf rules (data vs. syntax is no longer meaningful):
+
+{% raw %}
+```
+group: SAN
+template: email={{subject.email}}
+```
+
+```
+group: subjectDN
+template: O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
+```
+{% endraw %}
+
+Example parent rules:
+{% raw %}
+```
+group: opts
+groupProvided: SAN
+template: --extSAN {{ SAN|join(',') }}
+```
+
+```
+group: exts
+groupProvided: SAN
+template: subjectAltName=@{{ SAN.section_name }}
+```
+{% endraw %}
 
 ## Conclusions
+Although it is a significant departure from the current implementation, the
+"Formatter-based hierarchical rules" approach has several nice advantages:
 
+1. Profiles are simpler to configure, because they just contain a list of
+   references to rules rather than a structured list of groups of rules.
+2. Profiles are also simpler to implement, with no sub-objects in the database.
+3. It's no longer necessary to pay attention to escaping when writing rules.
+   Each rule is used as a template exactly once, and complex structures are
+   handled by the formatter code rather than template tags so tags don't need
+   to be passed along.
+4. User data is never used as a template, which reduces the attack surface.
+
+Because it is so different from what already exists, some experimentation is needed to make sure this is a feasible solution. Some potential concerns:
+
+1. Whether the openssl and certutil hierarchies for rules are compatible (i.e.
+   can the parent group can be listed in the mapping rule or must it be in the
+   transformation rule?)
+2. Are there any instances where something needs to be a group but can't be its
+   own openssl section? How would we convey this to the openssl formatter?
