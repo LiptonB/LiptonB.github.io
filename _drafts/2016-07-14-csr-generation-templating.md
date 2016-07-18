@@ -6,6 +6,7 @@ tags: freeipa
 ---
 
 ## Contents
+{:.no_toc}
 * TOC
 {:toc}
 
@@ -98,6 +99,11 @@ Some interesting things to note about these formats:
 ## Implementations
 
 ### Two-pass data interpolation
+
+```
+((user data -> data rules) -> syntax rules) -> output
+```
+
 One way we can approach constructing one extension from multiple sources it to
 use two sets of rules - one rule for each data item that provides a value for
 the extension, and one rule specifying the name and syntax of the extension as
@@ -114,9 +120,10 @@ defines where the sections are, what goes into them, and perhaps whether a
 given line should be placed under `[req]` or `[exts]`. This means that
 there are three template renderings, potentially accepting two different
 syntaxes. Even with the features of the formatter markup very limited, it would
-still be possible for a user to include data that would make it impossible to
-generate a certificate for them. So, some kind of escaping is also needed, but
-it would be jinja2 template markup escaping, not HTML escaping.
+still be possible for a user to accidentally or intentionally execute an
+injection attack that would make it impossible to generate a certificate for
+them. So, some kind of escaping is also needed, but it would be jinja2 template
+markup escaping, not HTML escaping.
 
 Example data rules:
 
@@ -160,6 +167,11 @@ Note, too, that the `section` tag does not exist yet in jinja2; it would need
 to be implemented as an extension.
 
 ### Two-pass template interpolation
+
+```
+(user data -> (data rules -> syntax rules)) -> output
+```
+
 Alternatively, we can do the substitution on the templates themselves before
 interpolating user data, building up one big template that we then render with
 the data from the database. This is safer because the user-specified data never
@@ -179,6 +191,11 @@ data rules themselves rather than data rules with interpolated user data. And
 of course, the `values` would not be escaped beforehand.
 
 ### Template-based hierarchical rules
+
+```
+user data -> collected rules -> output
+```
+
 An option that takes us in a different direction is to redesign the template so
 that the order of its elements no longer matters. That is, the hierarchical
 relationships between data items, certificate extensions, and the CSR as a
@@ -233,6 +250,13 @@ rules will be anyway. However, #2 would need to be addressed in any actual
 implementation.
 
 ### Formatter-based hierarchical rules
+```
+user data -> low-level rule -> formatting code -> group objects
+group objects -> higher-level rule -> formatting code -> group objects
+...
+group objects -> highest-level rule -> output
+```
+
 Instead of linking rules together into a hierarchy using tags, leaving it to
 the templating engine to interpret that structure, we could encode the
 structure in the rule entities themselves and use multiple evaluations to
@@ -284,9 +308,8 @@ template: subjectAltName=@{{ SAN.section_name }}
 ```
 {% endraw %}
 
-## Conclusions
-Although it is a significant departure from the current implementation, the
-"Formatter-based hierarchical rules" approach has several nice advantages:
+#### Evaluation
+This approach has several advantages:
 
 1. Profiles are simpler to configure, because they just contain a list of
    references to rules rather than a structured list of groups of rules.
@@ -297,10 +320,22 @@ Although it is a significant departure from the current implementation, the
    to be passed along.
 4. User data is never used as a template, which reduces the attack surface.
 
-Because it is so different from what already exists, some experimentation is needed to make sure this is a feasible solution. Some potential concerns:
+However, there are also some potential concerns:
 
 1. Whether the openssl and certutil hierarchies for rules are compatible (i.e.
    can the parent group can be listed in the mapping rule or must it be in the
    transformation rule?)
 2. Are there any instances where something needs to be a group but can't be its
    own openssl section? How would we convey this to the openssl formatter?
+3. Conversely, are there cases where we would want to be able to create a
+   section without creating a new rule? For example, a DN in a subject
+   alternative name needs to be its own section. Do we then need rules just for
+   filling out parts of that DN?
+
+If we need to synchronize the hierarchy of rules between certutil and openssl,
+it seems like there is no guarantee we'd be able to get the section hierarchy
+we need, and if a third CSR generation utility showed up there is no guarantee
+it would be flexible enough to synchronize with the existing rules. On the
+other hand, if the hierarchy is independent between openssl and certutil, how
+do we form "cross-platform" mapping rules out of them? Would it need to include
+potentially many transformations for one tool per mapping rule?
