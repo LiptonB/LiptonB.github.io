@@ -114,15 +114,15 @@ output. We wish to express the data and syntax rules using the templating
 language, but the formatters (one for each CSR generation tool) will be
 implemented as python classes.
 
-#### How do we represent openssl sections?
-The formatter needs to accept input in a (very limited) markup language, which
-defines where the sections are, what goes into them, and perhaps whether a
-given line should be placed under `[req]` or `[exts]`. Even with the features
-of the formatter markup very limited, it would still be possible for a user to
-accidentally or intentionally inject some markup that would make it impossible
-to generate a certificate for them. So, some kind of escaping is also needed,
-but it would be jinja2 template markup escaping, not the HTML escaping that
-jinja2 already supports.
+So how do we represent openssl sections in this scheme? The formatter needs to
+accept input in a (very limited) markup language, which defines where the
+sections are, what goes into them, and perhaps whether a given line should be
+placed under `[req]` or `[exts]`. Even with the features of the formatter
+markup very limited, it would still be possible for a user to accidentally or
+intentionally inject some markup that would make it impossible to generate a
+certificate for them. So, some kind of escaping is also needed, but it would be
+jinja2 template markup escaping, not the HTML escaping that jinja2 already
+supports.
 
 Example data rules:
 
@@ -195,11 +195,11 @@ of course, the `values` would not be escaped beforehand.
 user data -> collected rules -> output
 ```
 
-An option that takes us in a different direction is to redesign the template so
-that the order of its elements no longer matters. That is, the hierarchical
-relationships between data items, certificate extensions, and the CSR as a
-whole could be encoded using jinja2 tags. It's probably easiest to explain this
-idea with an example:
+One way to get away from escaping and multiple evaluations is to redesign the
+template so that the order of its elements no longer matters. That is, the
+hierarchical relationships between data items, certificate extensions, and the
+CSR as a whole could be encoded using jinja2 tags. It's probably easiest to
+explain this idea with an example:
 
 {% highlight jinja %}
 {% raw %}
@@ -278,7 +278,7 @@ section. This addresses concern #2 from the previous approach, because the
 tools of the jinja2 language are now available for expressing how to format the
 results of groups of rules.
 
-Example leaf rules (no longer have concept of data vs. syntax):
+Example leaf rules:
 
 {% raw %}
 ```
@@ -307,8 +307,7 @@ template: subjectAltName=@{{ SAN.section_name }}
 ```
 {% endraw %}
 
-#### Evaluation
-This approach has several advantages:
+This has several advantages over the two-pass interpolation approaches:
 
 1. Profiles are simpler to configure, because they just contain a list of
    references to rules rather than a structured list of groups of rules.
