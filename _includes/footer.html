@@ -6,7 +6,9 @@
       <div class="footer-col footer-col-1">
         <ul class="contact-list">
           <li>{{ site.title }}</li>
-          <li><a href="mailto:{{ site.email }}">{{ site.email }}</a></li>
+          {% for address in site.email %}
+          <li><a href="mailto:{{ address }}">{{ address }}</a></li>
+          {% endfor %}
         </ul>
       </div>
 

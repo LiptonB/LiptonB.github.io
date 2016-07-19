@@ -7,7 +7,9 @@
 
 # Site settings
 title: bl stash save
-email: ben.lipton@gmail.com
+email:
+  - ben.lipton@gmail.com
+  - blipton@redhat.com
 description: > # this means to ignore newlines until "baseurl:"
   Putting stuff where I can find it later.
 baseurl: "" # the subpath of your site, e.g. /blog
