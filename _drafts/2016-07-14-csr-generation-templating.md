@@ -117,13 +117,12 @@ implemented as python classes.
 #### How do we represent openssl sections?
 The formatter needs to accept input in a (very limited) markup language, which
 defines where the sections are, what goes into them, and perhaps whether a
-given line should be placed under `[req]` or `[exts]`. This means that
-there are three template renderings, potentially accepting two different
-syntaxes. Even with the features of the formatter markup very limited, it would
-still be possible for a user to accidentally or intentionally execute an
-injection attack that would make it impossible to generate a certificate for
-them. So, some kind of escaping is also needed, but it would be jinja2 template
-markup escaping, not HTML escaping.
+given line should be placed under `[req]` or `[exts]`. Even with the features
+of the formatter markup very limited, it would still be possible for a user to
+accidentally or intentionally inject some markup that would make it impossible
+to generate a certificate for them. So, some kind of escaping is also needed,
+but it would be jinja2 template markup escaping, not the HTML escaping that
+jinja2 already supports.
 
 Example data rules:
 
@@ -254,7 +253,7 @@ implementation.
 user data -> low-level rule -> formatting code -> group objects
 group objects -> higher-level rule -> formatting code -> group objects
 ...
-group objects -> highest-level rule -> output
+group objects -> top-level rule -> output
 ```
 
 Instead of linking rules together into a hierarchy using tags, leaving it to
@@ -279,7 +278,7 @@ section. This addresses concern #2 from the previous approach, because the
 tools of the jinja2 language are now available for expressing how to format the
 results of groups of rules.
 
-Example leaf rules (data vs. syntax is no longer meaningful):
+Example leaf rules (no longer have concept of data vs. syntax):
 
 {% raw %}
 ```
@@ -332,10 +331,22 @@ However, there are also some potential concerns:
    alternative name needs to be its own section. Do we then need rules just for
    filling out parts of that DN?
 
-If we need to synchronize the hierarchy of rules between certutil and openssl,
-it seems like there is no guarantee we'd be able to get the section hierarchy
-we need, and if a third CSR generation utility showed up there is no guarantee
-it would be flexible enough to synchronize with the existing rules. On the
-other hand, if the hierarchy is independent between openssl and certutil, how
-do we form "cross-platform" mapping rules out of them? Would it need to include
-potentially many transformations for one tool per mapping rule?
+## Conclusions
+Although hierarchical rules seem like an interesting solution to avoid escaping
+and simplify the configuration in the cert profile itself, I think the
+interpolation approaches are easier to understand and explain, which is
+valuable for this already unexpectedly-complex feature.
+
+Even though it is a little counter-intuitive, I lean towards the template
+interpolation solution rather than the straightforward data interpolation one
+because it doesn't incorporate user data until the last step.  This would make
+it incompatible with the existing python-based rules, but those are going to be
+replaced anyway, and in fact they may be vulnerable to injection attacks as
+well. Escaping of tags that are to be interpreted by the formatter will still
+be inconvenient, but we may be able to provide extensions to the template
+language to make that easier.
+
+If you are interested in discussing any of these options, feel free to email me
+directly at the address below, or share your thoughts with the
+[freeipa-devel mailing list](https://www.redhat.com/mailman/listinfo/freeipa-devel).
+Thanks!
