@@ -1,14 +1,7 @@
----
-title: Thinking about templating for automatic CSR generation
-layout: post
-highlighter: rouge
-tags: freeipa
----
+Title: Thinking about templating for automatic CSR generation
+Category: freeipa
 
-## Contents
-{:.no_toc}
-* TOC
-{:toc}
+[TOC]
 
 ## Background
 I am working on a project
