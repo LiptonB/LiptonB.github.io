@@ -1,5 +1,5 @@
 Title: Generating arbitrary CSR extensions with Openssl
-Tags: freeipa
+Category: freeipa
 Status: draft
 
 [TOC]
