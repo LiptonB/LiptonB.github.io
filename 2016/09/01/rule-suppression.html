@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+      <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="http://blog.benjaminlipton.com/2016/09/01/rule-suppression.html" />
+
+    <title>  bl stash save &mdash; "Thinking about templating, part 2: Handling missing data"
+</title>
+
+
+
+
+    <link rel="stylesheet" href="http://blog.benjaminlipton.com/theme/css/style.css">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <meta name="author" content="Benjamin Lipton">
+    <meta name="description" content="Introduction Simple approach: data rules only Current solution: See if something renders Issues Alternative: Declare data dependencies Suppressing excess commas and newlines Conclusions Appendix Introduction This post is a followup to Thinking about templating for automatic CSR generation. In it we will look at a requirement of the templating system ...">
+  <meta name="tags" contents="">
+</head>
+
+<body>
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <h1 class="header-name">
+        <a class="nodec" href="http://blog.benjaminlipton.com">bl stash save</a>
+      </h1>
+      <h3 class="header-text"></h3>
+      <ul class="header-menu list-inline">
+      </ul>
+    </div>
+  </div>
+</header> <!-- /.header -->  <div class="container">
+  <div class="post full-post">
+    <h1 class="post-title">
+      <a href="/2016/09/01/rule-suppression.html" title="Permalink to "Thinking about templating, part 2: Handling missing data"">"Thinking about templating, part 2: Handling missing data"</a>
+    </h1>
+    <ul class="list-inline">
+      <li class="post-date">
+        <a class="text-muted" href="/2016/09/01/rule-suppression.html" title="2016-09-01T00:00:00-04:00">Thu 01 September 2016</a>
+      </li>
+      <li class="muted">&middot;</li>
+      <li class="post-category">
+        <a href="http://blog.benjaminlipton.com/category/freeipa.html">freeipa</a>
+      </li>
+    </ul>
+    <div class="post-content">
+      <div class="toc">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#simple-approach-data-rules-only">Simple approach: data rules only</a></li>
+<li><a href="#current-solution-see-if-something-renders">Current solution: See if something renders</a><ul>
+<li><a href="#issues">Issues</a></li>
+</ul>
+</li>
+<li><a href="#alternative-declare-data-dependencies">Alternative: Declare data dependencies</a></li>
+<li><a href="#suppressing-excess-commas-and-newlines">Suppressing excess commas and newlines</a></li>
+<li><a href="#conclusions">Conclusions</a></li>
+<li><a href="#appendix">Appendix</a></li>
+</ul>
+</div>
+<h2 id="introduction">Introduction</h2>
+<p>This post is a followup to
+<a href="{% post_url 2016-07-19-csr-generation-templating %}">Thinking about templating for automatic CSR generation</a>.
+In it we will look at a requirement of the templating system that was not
+discussed in that post, and see how it is handled by the implementation.</p>
+<p>Sometimes you might want to generate a certificate for a principal that doesn't
+have all the fields referenced in the profile. This could be due to an error
+(e.g.  used the "user" profile for a "service" principal) or just the way the
+data is (e.g. the principal has no email address, or the requesting user has no
+access to that field). We want to handle this cleanly by omitting the sections
+of config that have missing data.</p>
+<h2 id="simple-approach-data-rules-only">Simple approach: data rules only</h2>
+<p>We can pretty simply update our data rules to do this partly right, like in
+this example:</p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">subject.fqdn.0</span> <span class="cp">%}</span><span class="x">DNS = </span><span class="cp">{{</span><span class="nv">subject.fqdn.0</span><span class="cp">}}{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p>This adds some extra work for administrators creating new rules, and is another
+step that someone could forget, but could be manageble.</p>
+<p>However, if <em>none</em> of the data rules for a field has any data, we need to avoid
+rendering the syntax rule for that field as well, otherwise we get weird empty
+sections that openssl doesn't like. Modifying the rule templates can't solve
+this problem, because the syntax rule intentionally doesn't know what data it
+may depend on for different profiles; that all depends on the data rules.</p>
+<h2 id="current-solution-see-if-something-renders">Current solution: See if something renders</h2>
+<p>One way to make this work is to build syntax rules so they use jinja2 control
+tags to compute the output of any data rules first, then render their own text
+only if some data rule rendered successfully. In its raw form, this gets ugly
+(see [1] for explanation):</p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">raw</span> <span class="cp">%}</span>{% set contents %}<span class="cp">{%</span> <span class="k">endraw</span> <span class="cp">%}{{</span> <span class="nv">datarules</span><span class="o">|</span><span class="nf">join</span><span class="o">(</span><span class="s1">&#39;\n&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">raw</span> <span class="cp">%}</span>{% endset %}{% if contents %}<span class="cp">{%</span> <span class="k">endraw</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">subjectAltName = @</span><span class="cp">{%</span> <span class="k">call</span> <span class="nv">openssl.section</span><span class="o">()</span> <span class="cp">%}{%</span> <span class="k">raw</span> <span class="cp">%}</span>{{ contents }}
+<span class="cp">{%</span> <span class="k">endraw</span> <span class="cp">%}{%</span> <span class="k">endcall</span> <span class="cp">%}{%</span> <span class="k">raw</span> <span class="cp">%}</span>{% endif %}<span class="cp">{%</span> <span class="k">endraw</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p>For comparison, that rule used to look like this:</p>
+<div class="highlight"><pre><span></span><span class="x">subjectAltName = @</span><span class="cp">{%</span> <span class="k">call</span> <span class="nv">openssl.section</span><span class="o">()</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">datarules</span><span class="o">|</span><span class="nf">join</span><span class="o">(</span><span class="s1">&#39;\n&#39;</span><span class="o">)</span> <span class="cp">}}{%</span> <span class="k">endcall</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p>I think this might be a heavy burden for administrators who want to write new
+syntax rules.</p>
+<p>However, we can introduce some macros to make this better. One macro,
+<code>syntaxrule</code>, computes the result of rendering the data rules it contains, but
+does not output these results unless a flag is set to true. That flag is
+controlled by another macro, <code>datarule</code>, which updates the flag to true when
+the enclosed data rule renders successfully. We can apply a similar technique
+to the fields in the data rules, rendering the rule only if all fields are
+present.</p>
+<p>Now, the framework can automatically wrap all syntax rules in
+<code>{% call ipa.syntaxrule() %}...{% endcall %}</code> and all data
+rules in <code>{% call ipa.datarule() %}...{% endcall %}</code>.
+Writers of data rules must wrap all field references in <code>ipa.datafield()</code> to
+mark values that could be missing, such as
+<code>{{ ipa.datafield(subject.mail.0) }}</code>,
+but no other modifications to the rules are necessary.</p>
+<p>This is the way rule suppression is currently implemented.</p>
+<h3 id="issues">Issues</h3>
+<p>This system seems to be working fairly well, but it has a few drawbacks.</p>
+<p>First, the macros to do this are a little arcane, as can be seen in [2], and
+can't be commented very well because any whitespace becomes part of the macro
+output.  They rely on global variables within the template, but this should be
+ok as long as we always nest datafields within datarules within syntaxrules,
+and never nest more than once.</p>
+<p>Second, syntax rules with multiple assigned data rules present a problem.
+Generally we will want the results of those rules to be presented in the output
+with some character in between, e.g.
+<code>{{datarules|join(',')}}</code> for certutil. However, when we
+finally render this template with data, what if one of our datarules renders
+while another does not due to lack of data? The above rule segment would
+produce a template like:</p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">call</span> <span class="nv">ipa.datarule</span><span class="o">()</span> <span class="cp">%}</span><span class="x">email:</span><span class="cp">{{</span><span class="nv">ipa.datafield</span><span class="o">(</span><span class="nv">subject.mail.0</span><span class="o">)|</span><span class="nf">quote</span><span class="cp">}}{%</span> <span class="k">endcall</span> <span class="cp">%}</span><span class="x">,</span><span class="cp">{%</span> <span class="k">call</span> <span class="nv">ipa.datarule</span><span class="o">()</span> <span class="cp">%}</span><span class="x">uri:</span><span class="cp">{{</span><span class="nv">ipa.datafield</span><span class="o">(</span><span class="nv">subject.inetuserhttpurl.0</span><span class="o">)|</span><span class="nf">quote</span><span class="cp">}}{%</span> <span class="k">endcall</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p>If this subject has no <code>inetuserhttpurl</code> field, the second <code>ipa.datarule</code> will
+be suppressed, leaving an empty string. But, the comma will still be there!
+This creates odd-looking output like the following:</p>
+<div class="highlight"><pre><span></span>--extSAN email:myuser@example.com,
+</pre></div>
+
+
+<p>Fortunately, certutil seems not to mind these extra commas, and openssl is also
+ok with the extra blank lines that arise the same way, so this isn't breaking
+anything right now. But, it's worrying not to be able to do much to improve
+this formatting.</p>
+<p>Third, there is an unfortunate interaction between the macros created for this
+technique, the above issue, and the macro that produces openssl sections. That
+macro [3] also relies on side effects to do its job - the contents of the
+section are appended to a global list of sections, while only the section name
+is returned at the point where the macro is called. Since the technique
+discussed in this section evaluates each data rule to see if it produces any
+data, if the rule includes an openssl section, a section is stored on rule
+evaluation even if it has no data. Again, openssl is ok with the extra sections
+as long as they are not referenced within the config file, but the result is
+ugly.</p>
+<h2 id="alternative-declare-data-dependencies">Alternative: Declare data dependencies</h2>
+<p>Another approach to suppressing syntax rules when none of their data rules are
+going to render is to take the "simple approach" of listing the required data
+items in an <code>{% if %}</code> statement one step further. We
+could amend the schema for data rules to include a record of the included data
+item, so that each rule would know its dependencies. Data rules could then be
+automatically wrapped so they wouldn't be rendered if this item was
+unavailable. Syntax rules could be treated similarly; by querying the
+dependencies of all the data rules it was configured to include, the whole
+syntax rule could be suppressed if none of those items were available.</p>
+<p>In this scheme, the template produced would look like (linebreaks and
+indentation added):</p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">subject.mail.0</span> <span class="k">or</span> <span class="nv">subject.inethttpurl.0</span> <span class="cp">%}</span><span class="x">--extSAN</span>
+<span class="x">  </span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">subject.mail.0</span> <span class="cp">%}</span><span class="x">email:</span><span class="cp">{{</span><span class="nv">subject.mail.0</span><span class="o">|</span><span class="nf">quote</span><span class="cp">}}{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x">,</span>
+<span class="x">  </span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">subject.inethttpurl.0</span> <span class="cp">%}</span><span class="x">uri:</span><span class="cp">{{</span><span class="nv">subject.inethttpurl.0</span><span class="o">|</span><span class="nf">quote</span><span class="cp">}}{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p>This takes care of the third problem of the previous solution, because data
+rules with missing data will never be evaluated, meaning that superfluous
+openssl sections will not be added. However, the second problem still persists,
+because the commas and newlines are part of the syntax rule (which is rendered)
+not the data rules (some of which aren't rendered).</p>
+<h2 id="suppressing-excess-commas-and-newlines">Suppressing excess commas and newlines</h2>
+<p>The challenge with preventing these extra commas and newlines is that they must
+be evaluated during the final render, when the subject data is available, not
+when the syntax rules are evaluated to build the final template. Using the
+<code>join</code> filter in the syntax rule is insufficient, because it is evaluated
+before that data is available. What we really want is to pass the <em>output</em> of
+all the data rules to the join filter, <em>at final render time</em>.</p>
+<p>This is not a polished solution, but an image of what this could look like is
+for the data rule to be:</p>
+<div class="highlight"><pre><span></span><span class="x">--extSAN </span><span class="cp">{{</span><span class="nv">datarules</span><span class="o">|</span><span class="nf">filternonempty</span><span class="o">(</span><span class="s2">&quot;join(&#39;,&#39;)&quot;</span><span class="o">)</span><span class="cp">}}</span><span class="x"></span>
+</pre></div>
+
+
+<p>Which would create a final template like:</p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">filternonempty</span> <span class="nv">join</span><span class="o">(</span><span class="s1">&#39;,&#39;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">&lt;data rule 1&gt;</span>
+<span class="cp">{%</span> <span class="k">filterpart</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">&lt;data rule 2&gt;</span>
+<span class="cp">{%</span> <span class="k">endfilternonempty</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p>And the <code>filternonempty</code> tag would be implemented so the effect of this would
+be approximately:</p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">parts</span> <span class="o">=</span> <span class="o">[]</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">part</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">&lt;data rule 1&gt;</span>
+<span class="cp">{%</span> <span class="k">endset</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">part</span> <span class="cp">%}{%</span> <span class="k">do</span> <span class="nv">parts.append</span><span class="o">(</span><span class="nv">part</span> <span class="cp">%}{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">part</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">&lt;data rule 2&gt;</span>
+<span class="cp">{%</span> <span class="k">endset</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">part</span> <span class="cp">%}{%</span> <span class="k">do</span> <span class="nv">parts.append</span><span class="o">(</span><span class="nv">part</span> <span class="cp">%}{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">parts</span><span class="o">|</span><span class="nf">join</span><span class="o">(</span><span class="s1">&#39;,&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+</pre></div>
+
+
+<p>I think this is doable, but I don't have a prototype yet.</p>
+<h2 id="conclusions">Conclusions</h2>
+<p>The current implementation is working ok, but the "Declaring data dependencies"
+solution is also appealing. Recording in data rules what data they depend on is
+only slightly more involved than wrapping that reference in <code>ipa.datafield()</code>,
+and could also be useful for other purposes. Plus, it would get rid of the
+empty sections in openssl configs, as well as some of the complex macros.</p>
+<p>The extra templating and new tags required to get rid of extra commas and
+newlines don't seem worth it to me, unless we discover a version of openssl or
+certutil that can't consume the current output.</p>
+<p>Finally, I think the number of hoops needing to be jumped through to fine-tune
+the output format hint at this "template interpolation" approach being less
+successful than originally expected. While it was expected that inserting data
+rule templates into syntax rule templates and rendering the whole thing would
+produce similar results to rendering data rules first and inserting the output
+into syntax rules, that is not turning out to be the case. It might be wise to
+reconsider the simpler option - it may be easier to implement reliable jinja2
+template markup escaping than to build templates smart enough to handle any
+combination of data that's available.</p>
+<h2 id="appendix">Appendix</h2>
+<p>[1] In case you're having trouble parsing this mess, when rendered to insert
+data rules, and with whitespace added for readability, it turns into this:</p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">contents</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">subject.mail.0</span> <span class="cp">%}</span><span class="x">email = </span><span class="cp">{{</span><span class="nv">subject.mail.0</span><span class="cp">}}{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"> &lt;-- this is the data rule</span>
+<span class="cp">{%</span> <span class="k">endset</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">contents</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    subjectAltName = @</span><span class="cp">{%</span> <span class="k">call</span> <span class="nv">openssl.section</span><span class="o">()</span> <span class="cp">%}{{</span> <span class="nv">contents</span> <span class="cp">}}{%</span> <span class="k">endcall</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p>[2]</p>
+<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">rendersyntax</span> <span class="o">=</span> <span class="o">{}</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">renderdata</span> <span class="o">=</span> <span class="o">{}</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="c">{# Wrapper for syntax rules. We render the contents of the rule into a</span>
+<span class="c">variable, so that if we find that none of the contained data rules rendered we</span>
+<span class="c">can suppress the whole syntax rule. That is, a syntax rule is rendered either</span>
+<span class="c">if no data rules are specified (unusual) or if at least one of the data rules</span>
+<span class="c">rendered successfully. #}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">macro</span> <span class="nv">syntaxrule</span><span class="o">()</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">do</span> <span class="nv">rendersyntax.update</span><span class="o">(</span><span class="kp">none</span><span class="o">=</span><span class="kp">true</span><span class="o">,</span> <span class="nv">any</span><span class="o">=</span><span class="kp">false</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">contents</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">caller</span><span class="o">()</span> -<span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endset</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">rendersyntax</span><span class="o">[</span><span class="s1">&#39;none&#39;</span><span class="o">]</span> <span class="k">or</span> <span class="nv">rendersyntax</span><span class="o">[</span><span class="s1">&#39;any&#39;</span><span class="o">]</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">contents</span> -<span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endif</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="c">{# Wrapper for data rules. A data rule is rendered only when all of the data</span>
+<span class="c">fields it contains have data available. #}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">macro</span> <span class="nv">datarule</span><span class="o">()</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">do</span> <span class="nv">rendersyntax.update</span><span class="o">(</span><span class="kp">none</span><span class="o">=</span><span class="kp">false</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">do</span> <span class="nv">renderdata.update</span><span class="o">(</span><span class="nv">all</span><span class="o">=</span><span class="kp">true</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">contents</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">caller</span><span class="o">()</span> -<span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endset</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">renderdata</span><span class="o">[</span><span class="s1">&#39;all&#39;</span><span class="o">]</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">do</span> <span class="nv">rendersyntax.update</span><span class="o">(</span><span class="nv">any</span><span class="o">=</span><span class="kp">true</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">contents</span> -<span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endif</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="c">{# Wrapper for fields in data rules. If any value wrapped by this macro</span>
+<span class="c">produces an empty string, the entire data rule will be suppressed. #}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">macro</span> <span class="nv">datafield</span><span class="o">(</span><span class="nv">value</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">value</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">value</span> -<span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">else</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">do</span> <span class="nv">renderdata.update</span><span class="o">(</span><span class="nv">all</span><span class="o">=</span><span class="kp">false</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endif</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p>[3]</p>
+<div class="highlight"><pre><span></span><span class="c">{# List containing rendered sections to be included at end #}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">openssl_sections</span> <span class="o">=</span> <span class="o">[]</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="c">{#</span>
+<span class="c">List containing one entry for each section name allocated. Because of</span>
+<span class="c">scoping rules, we need to use a list so that it can be a &quot;per-render global&quot;</span>
+<span class="c">that gets updated in place. Real globals are shared by all templates with the</span>
+<span class="c">same environment, and variables defined in the macro don&#39;t persist after the</span>
+<span class="c">macro invocation ends.</span>
+<span class="c">#}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">openssl_section_num</span> <span class="o">=</span> <span class="o">[]</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">macro</span> <span class="nv">section</span><span class="o">()</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">name</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="x">sec</span><span class="cp">{{</span> <span class="nv">openssl_section_num</span><span class="o">|</span><span class="nf">length</span> -<span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endset</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">do</span> <span class="nv">openssl_section_num.append</span><span class="o">(</span><span class="s1">&#39;&#39;</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">contents</span> <span class="cp">%}{{</span> <span class="nv">caller</span><span class="o">()</span> <span class="cp">}}{%</span> <span class="k">endset</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">contents</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">sectiondata</span> <span class="o">=</span> <span class="nv">formatsection</span><span class="o">(</span><span class="nv">name</span><span class="o">,</span> <span class="nv">contents</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">do</span> <span class="nv">openssl_sections.append</span><span class="o">(</span><span class="nv">sectiondata</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endif</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">name</span> -<span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">macro</span> <span class="nv">formatsection</span><span class="o">(</span><span class="nv">name</span><span class="o">,</span> <span class="nv">contents</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="x">[ </span><span class="cp">{{</span> <span class="nv">name</span> <span class="cp">}}</span><span class="x"> ]</span>
+<span class="cp">{{</span> <span class="nv">contents</span> -<span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+    </div>
+  </div>
+  <hr class="separator">
+  <div class="col-md-8 col-md-offset-2">
+  </div>
+  </div>
+<footer class="footer">
+  <div class="container">
+    <p class="text-center">
+      Benjamin Lipton, <a href="" target="_blank"></a> unless otherwise noted.
+    </p>
+    <div class="text-center">
+      Generated by <a href="http://getpelican.com" target="_blank">Pelican</a> with the <a href="http://github.com/nairobilug/pelican-alchemy">alchemy</a> theme.
+    </div>
+  </div>
+</footer> <!-- /.footer -->
+  <script src="http://blog.benjaminlipton.com/theme/js/jquery.min.js"></script>
+  <script src="http://blog.benjaminlipton.com/theme/js/bootstrap.min.js"></script>
+</body> <!-- 42 -->
+
+</html>
