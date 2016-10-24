@@ -36,5 +36,5 @@ DEFAULT_PAGINATION = False
 
 # Uncomment following line if you want document-relative URLs when developing
 #RELATIVE_URLS = True
-MD_EXTENSIONS = [TocExtension(), CodeHiliteExtension()]
+MD_EXTENSIONS = [TocExtension(), CodeHiliteExtension(css_class='highlight')]
 THEME = '../pelican-themes/alchemy/alchemy'
