@@ -7327,7 +7327,7 @@ a:hover {
   border-bottom: none;
 }
 .post.mini-post .post-title {
-  font-size: 18px;
+/*  font-size: 18px; */
   line-height: 1.42857143;
   margin-bottom: 10px;
   margin-top: 0;
