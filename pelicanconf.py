@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 from markdown.extensions.toc import TocExtension
 from markdown.extensions.codehilite import CodeHiliteExtension
 
-AUTHOR = u'Benjamin Lipton'
-SITENAME = u'bl stash save'
+AUTHOR = 'Benjamin Lipton'
+SITENAME = 'bl stash save'
 SITEURL = ''
 
 PATH = 'content'
@@ -16,7 +16,7 @@ EXTRA_PATH_METADATA = {'extra/CNAME': {'path': 'CNAME'}}
 
 TIMEZONE = 'America/New_York'
 
-DEFAULT_LANG = u'en'
+DEFAULT_LANG = 'en'
 
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
