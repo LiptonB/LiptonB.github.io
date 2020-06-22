@@ -1,11 +1,11 @@
-Title: "Thinking about templating, part 2: Handling missing data"
+Title: Thinking about templating, part 2: Handling missing data
 Category: freeipa
 
 [TOC]
 
 ## Introduction
 This post is a followup to
-[Thinking about templating for automatic CSR generation]({% post_url 2016-07-19-csr-generation-templating %}).
+[Thinking about templating for automatic CSR generation]({filename}2016-07-19-csr-generation-templating.md).
 In it we will look at a requirement of the templating system that was not
 discussed in that post, and see how it is handled by the implementation.
 
