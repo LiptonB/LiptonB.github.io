@@ -38,37 +38,33 @@ implemented using the [Jinja2](http://jinja2.pocoo.org/) templating language.
 We must at a minimum be able to generate two different types of configuration,
 the openssl config file:
 
-```
-[ req ]
-prompt = no
-encrypt_key = no
-
-distinguished_name = dn
-req_extensions = exts
-
-[ dn ]
-O=DOMAIN.EXAMPLE.COM
-CN=user
-
-[ exts ]
-subjectAltName=@SAN
-
-[ SAN ]
-email=user@example.com
-dirName=SANdn
-
-[ SANdn ]
-1.DC=com
-2.DC=example
-CN=users
-UID=user
-```
+    [ req ]
+    prompt = no
+    encrypt_key = no
+    
+    distinguished_name = dn
+    req_extensions = exts
+    
+    [ dn ]
+    O=DOMAIN.EXAMPLE.COM
+    CN=user
+    
+    [ exts ]
+    subjectAltName=@SAN
+    
+    [ SAN ]
+    email=user@example.com
+    dirName=SANdn
+    
+    [ SANdn ]
+    1.DC=com
+    2.DC=example
+    CN=users
+    UID=user
 
 and the certutil command line:
 
-```
-certutil -R -a -s "CN=user,O=DOMAIN.EXAMPLE.COM" --extSAN "email:user@example.com,dn:UID=user;CN=users;DC=example;DC=com"
-```
+    certutil -R -a -s "CN=user,O=DOMAIN.EXAMPLE.COM" --extSAN "email:user@example.com,dn:UID=user;CN=users;DC=example;DC=com"
 
 Some interesting things to note about these formats:
 
@@ -93,9 +89,7 @@ Some interesting things to note about these formats:
 
 ### Two-pass data interpolation
 
-```
-((user data -> data rules) -> syntax rules) -> output
-```
+    ((user data -> data rules) -> syntax rules) -> output
 
 One way we can approach constructing one extension from multiple sources it to
 use two sets of rules - one rule for each data item that provides a value for
@@ -119,37 +113,27 @@ supports.
 
 Example data rules:
 
-{% raw %}
-```
-email={{subject.email}}
-```
+    email={{subject.email}}
 
-```
-O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
-```
-{% endraw %}
+# 
+
+    O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
 
 Example syntax rules:
-{% raw %}
-```
---extSAN {{values|join(',')}}
-```
 
-```
-subjectAltName=@{{{% endraw %}{% raw %}'{% section %}'}}{{values|join('\n')}}{{{% endraw %}{% raw %}'{% endsection %}'}}
-```
-{% endraw %}
+    --extSAN {{values|join(',')}}
+
+# 
+
+    subjectAltName=@{{'{% section %}'}}{{values|join('\n')}}{{'{% endsection %}'}}
 
 That's a lot of braces! We have to escape the `section` and `endsection` tags
 sequences so they will appear verbatim in the final template, producing
 something like:
 
-{% raw %}
-```
-subjectAltName=@{% section %}email={{subject.email}}
-URI={{subject.inetuserhttpurl}}{% endsection %}
-```
-{% endraw %}
+    subjectAltName=@{% section %}email={{subject.email}}
+    URI={{subject.inetuserhttpurl}}{% endsection %}
+
 If we used a different type of markup for the user data interpolation and for
 denoting sections, the escaping would not be necessary; however, we would still
 need to preprocess the `values` to escape any jinja2 markup that comes from the
@@ -160,9 +144,7 @@ to be implemented as an extension.
 
 ### Two-pass template interpolation
 
-```
-(user data -> (data rules -> syntax rules)) -> output
-```
+    (user data -> (data rules -> syntax rules)) -> output
 
 Alternatively, we can do the substitution on the templates themselves before
 interpolating user data, building up one big template that we then render with
@@ -184,9 +166,7 @@ of course, the `values` would not be escaped beforehand.
 
 ### Template-based hierarchical rules
 
-```
-user data -> collected rules -> output
-```
+    user data -> collected rules -> output
 
 One way to get away from escaping and multiple evaluations is to redesign the
 template so that the order of its elements no longer matters. That is, the
@@ -194,29 +174,24 @@ hierarchical relationships between data items, certificate extensions, and the
 CSR as a whole could be encoded using jinja2 tags. It's probably easiest to
 explain this idea with an example:
 
-{% highlight jinja %}
-{% raw %}
-{% group req %}
-{% entry req %}extensions={% group exts %}{% endentry %}
-{% entry req %}distinguished_name={% group subjectDN %}{% endentry %}
-{% entry subjectDN %}O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}{% endentry %}
-{% entry exts %}subjectAltName=@{% group SAN %}{% endentry %}
-{% entry SAN %}email={{subject.email}}{% endentry %}
-{% entry SAN %}URI={{subject.inetuserhttpurl}}{% endentry %}
-{% endraw %}
-{% endhighlight %}
+    :::jinja
+    {% group req %}
+    {% entry req %}extensions={% group exts %}{% endentry %}
+    {% entry req %}distinguished_name={% group subjectDN %}{% endentry %}
+    {% entry subjectDN %}O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}{% endentry %}
+    {% entry exts %}subjectAltName=@{% group SAN %}{% endentry %}
+    {% entry SAN %}email={{subject.email}}{% endentry %}
+    {% entry SAN %}URI={{subject.inetuserhttpurl}}{% endentry %}
 
 The config for certutil would be quite similar:
-{% highlight jinja %}
-{% raw %}
-certutil -R -a {% group opts %}
-{% entry opts %}-s {% group subjectDN %}{% endentry %}
-{% entry opts %}--extSAN {% group SAN %}{% endentry %}
-{% entry subjectDN %}CN={{subject.username}},O={{config.ipacertificatesubjectbase}}{% endentry %}
-{% entry SAN %}email:{{subject.email}}{% endentry %}
-{% entry SAN %}uri:{{subject.inetuserhttpurl}}{% endentry %}
-{% endraw %}
-{% endhighlight %}
+
+    :::jinja
+    certutil -R -a {% group opts %}
+    {% entry opts %}-s {% group subjectDN %}{% endentry %}
+    {% entry opts %}--extSAN {% group SAN %}{% endentry %}
+    {% entry subjectDN %}CN={{subject.username}},O={{config.ipacertificatesubjectbase}}{% endentry %}
+    {% entry SAN %}email:{{subject.email}}{% endentry %}
+    {% entry SAN %}uri:{{subject.inetuserhttpurl}}{% endentry %}
 
 Each CSR generation helper would have its own notion of "groups," which would
 be implemented as jinja2 extensions. The entries of a group would be collected
@@ -242,12 +217,11 @@ rules will be anyway. However, #2 would need to be addressed in any actual
 implementation.
 
 ### Formatter-based hierarchical rules
-```
-user data -> low-level rule -> formatting code -> group objects
-group objects -> higher-level rule -> formatting code -> group objects
-...
-group objects -> top-level rule -> output
-```
+
+    user data -> low-level rule -> formatting code -> group objects
+    group objects -> higher-level rule -> formatting code -> group objects
+    ...
+    group objects -> top-level rule -> output
 
 Instead of linking rules together into a hierarchy using tags, leaving it to
 the templating engine to interpret that structure, we could encode the
@@ -256,7 +230,7 @@ handle the hierarchy in the formatter, before the data even gets to the
 templating engine. Each rule would be stored with the name of the group within
 which it should be rendered, as well as the names of any groups that the rule
 includes. For example, to adapt the rule
-`{% raw %}{% entry exts %}subjectAltName=@{% group SAN %}{% endentry %}{% endraw %}`
+`{% entry exts %}subjectAltName=@{% group SAN %}{% endentry %}`
 to this schema, we would say that it is an element of the "exts" group,
 and provides the "SAN" group. By linking up group elements to group providers,
 we construct a tree of rules.
@@ -273,32 +247,25 @@ results of groups of rules.
 
 Example leaf rules:
 
-{% raw %}
-```
-group: SAN
-template: email={{subject.email}}
-```
+    group: SAN
+    template: email={{subject.email}}
 
-```
-group: subjectDN
-template: O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
-```
-{% endraw %}
+# 
+
+    group: subjectDN
+    template: O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
 
 Example parent rules:
-{% raw %}
-```
-group: opts
-groupProvided: SAN
-template: --extSAN {{ SAN|join(',') }}
-```
 
-```
-group: exts
-groupProvided: SAN
-template: subjectAltName=@{{ SAN.section_name }}
-```
-{% endraw %}
+    group: opts
+    groupProvided: SAN
+    template: --extSAN {{ SAN|join(',') }}
+
+# 
+
+    group: exts
+    groupProvided: SAN
+    template: subjectAltName=@{{ SAN.section_name }}
 
 This has several advantages over the two-pass interpolation approaches:
 
