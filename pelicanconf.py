@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*- #
 from __future__ import unicode_literals
 
-from markdown.extensions.toc import TocExtension
-from markdown.extensions.codehilite import CodeHiliteExtension
-
 AUTHOR = 'Benjamin Lipton'
 SITENAME = 'bl stash save'
 SITEURL = ''
@@ -43,5 +40,13 @@ DEFAULT_PAGINATION = False
 
 # Uncomment following line if you want document-relative URLs when developing
 #RELATIVE_URLS = True
-MD_EXTENSIONS = [TocExtension(), CodeHiliteExtension(css_class='highlight', guess_lang=False)]
 THEME = '../pelican-themes/alchemy/alchemy'
+MARKDOWN = {
+    'extension_configs': {
+        'markdown.extensions.toc': {},
+        'markdown.extensions.codehilite': {
+            'css_class': 'highlight',
+            'guess_lang': False,
+        }
+    }
+}
