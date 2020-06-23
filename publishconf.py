@@ -14,7 +14,7 @@ SITEURL = 'http://blog.benjaminlipton.com'
 RELATIVE_URLS = False
 
 FEED_ALL_ATOM = 'feed.xml'
-CATEGORY_FEED_ATOM = 'categories/%s.xml'
+CATEGORY_FEED_ATOM = 'categories/{slug}.xml'
 
 DELETE_OUTPUT_DIRECTORY = True
 
