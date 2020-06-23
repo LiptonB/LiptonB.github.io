@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 AUTHOR = 'Benjamin Lipton'
 SITENAME = 'bl stash save'
 SITEURL = 'http://blog.benjaminlipton.com'
-RELATIVE_URLS = True
 
 PATH = 'content'
 
@@ -40,7 +39,7 @@ SOCIAL = (('You can add links in your config file', '#'),
 DEFAULT_PAGINATION = False
 
 # Uncomment following line if you want document-relative URLs when developing
-#RELATIVE_URLS = True
+RELATIVE_URLS = True
 THEME = 'themes/pelican-alchemy/alchemy'
 MARKDOWN = {
     'extension_configs': {
