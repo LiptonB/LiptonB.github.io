@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>bl stash save - system administration</title><link href="http://blog.benjaminlipton.com/" rel="alternate"></link><link href="http://blog.benjaminlipton.com/categories/system-administration.xml" rel="self"></link><id>http://blog.benjaminlipton.com/</id><updated>2020-05-30T00:00:00-04:00</updated><entry><title>Building a Custom Bootable USB to Install Debian over SSH</title><link href="http://blog.benjaminlipton.com/2020/05/30/install-debian-ssh.html" rel="alternate"></link><published>2020-05-30T00:00:00-04:00</published><updated>2020-05-30T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2020-05-30:/2020/05/30/install-debian-ssh.html</id><summary type="html">&lt;div class="toc"&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="#introduction"&gt;Introduction&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#steps"&gt;Steps&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#does-it-work"&gt;Does it work?&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;h1 id="introduction"&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;I recently got a Soekris net6501 box that I wanted to configure as a
+wireless/wired router. However, the box has no mouse/keyboard or monitor
+connections, only a serial console, and I don't have the right cable. (I know,
+surely everybody has RS232 …&lt;/p&gt;</summary><content type="html">&lt;div class="toc"&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="#introduction"&gt;Introduction&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#steps"&gt;Steps&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#does-it-work"&gt;Does it work?&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;h1 id="introduction"&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;I recently got a Soekris net6501 box that I wanted to configure as a
+wireless/wired router. However, the box has no mouse/keyboard or monitor
+connections, only a serial console, and I don't have the right cable. (I know,
+surely everybody has RS232 gear lying around, right?) So while I'm waiting for
+my null modem adapter to arrive, let's make a Debian installer USB stick that
+will start up a network console automatically, so that I can SSH in and see
+what I'm doing.&lt;/p&gt;
+&lt;p&gt;My method is based on
+&lt;a href="https://www.christiansaga.de/sowhatisthesolution/2016/03/13/headless-debian-install-via-ssh.html"&gt;this article&lt;/a&gt;,
+but it is tested on Debian 10, and simpler as we can edit the files on the USB
+directly rather than re-packing the ISO.&lt;/p&gt;
+&lt;h1 id="steps"&gt;Steps&lt;/h1&gt;
+&lt;ol&gt;
+&lt;li&gt;Download the &lt;a href="http://ftp.us.debian.org/debian/dists/buster/main/installer-amd64/current/images/hd-media/boot.img.gz"&gt;hd-media/boot.img.gz&lt;/a&gt; file from a Debian mirror. This is a simple, single-partition, bootable installer image.&lt;/li&gt;
+&lt;li&gt;Copy the image to your USB drive: &lt;code&gt;zcat boot.img.gz &amp;gt; /dev/sdb&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Mount the USB drive: `mkdir usb; mount /dev/sdb usb; cd usb&lt;/li&gt;
+&lt;li&gt;Copy in a cd image: &lt;code&gt;wget https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.4.0-amd64-netinst.iso&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Edit the boot parameters in drk.cfg:&lt;ul&gt;
+&lt;li&gt;remove &lt;code&gt;--- quiet&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;add &lt;code&gt;file=/hd-media/preseed.cfg auto=true&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Comment out the &lt;code&gt;default&lt;/code&gt; line in &lt;code&gt;syslinux.cfg&lt;/code&gt; so that it will fall through to the text-based configurations&lt;/li&gt;
+&lt;li&gt;Download the preseed template: &lt;code&gt;wget -O preseed.cfg http://www.debian.org/releases/stable/example-preseed.txt&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Configure the hostname and enable the network console in the preseed file:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gd"&gt;--- example-preseed.txt 2020-01-12 10:42:06.000000000 -0500&lt;/span&gt;
+&lt;span class="gi"&gt;+++ preseed.cfg     2020-05-30 08:59:49.570798811 -0400&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -65,8 +65,8 @@&lt;/span&gt;
+ # Any hostname and domain names assigned from dhcp take precedence over
+ # values set here. However, setting the values still prevents the questions
+ # from being shown, even if values come from dhcp.
+&lt;span class="gd"&gt;-d-i netcfg/get_hostname string unassigned-hostname&lt;/span&gt;
+&lt;span class="gd"&gt;-d-i netcfg/get_domain string unassigned-domain&lt;/span&gt;
+&lt;span class="gi"&gt;+d-i netcfg/get_hostname string router&lt;/span&gt;
+&lt;span class="gi"&gt;+d-i netcfg/get_domain string example.com&lt;/span&gt;
+
+ # If you want to force a hostname, regardless of what either the DHCP
+ # server returns or what the reverse DNS entry for the IP is, uncomment
+&lt;span class="gu"&gt;@@ -87,10 +87,10 @@&lt;/span&gt;
+ # Use the following settings if you wish to make use of the network-console
+ # component for remote installation over SSH. This only makes sense if you
+ # intend to perform the remainder of the installation manually.
+&lt;span class="gd"&gt;-#d-i anna/choose_modules string network-console&lt;/span&gt;
+&lt;span class="gi"&gt;+d-i anna/choose_modules string network-console&lt;/span&gt;
+ #d-i network-console/authorized_keys_url string http://10.0.0.1/openssh-key
+&lt;span class="gd"&gt;-#d-i network-console/password password r00tme&lt;/span&gt;
+&lt;span class="gd"&gt;-#d-i network-console/password-again password r00tme&lt;/span&gt;
+&lt;span class="gi"&gt;+d-i network-console/password password install&lt;/span&gt;
+&lt;span class="gi"&gt;+d-i network-console/password-again password install&lt;/span&gt;
+
+ ### Mirror settings
+ # If you select ftp, the mirror/country string does not need to be set.
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Unmount the USB drive and insert it into the device you want to install.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id="does-it-work"&gt;Does it work?&lt;/h1&gt;
+&lt;p&gt;Kind of. If I booted up my Soekris box with the USB drive as the only connected
+disk, it booted up into my Debian installer and started up the network console
+just fine. I could SSH in and continue the installation. However, with only the
+USB drive connected there was nowhere to install to. On the other hand, if I
+put the internal mSATA disk back in, the box would boot from that instead and
+I'd be stuck. Inserting the mSATA disk after Debian installer was booted didn't
+work either. It just caused the device to become nonresponsive - I think the
+mSATA controller might not support hotplugging. So, it seems like this
+installer USB works, but I'm still going to need a serial cable to install my
+router.&lt;/p&gt;</content><category term="system administration"></category><category term="Debian"></category></entry></feed>

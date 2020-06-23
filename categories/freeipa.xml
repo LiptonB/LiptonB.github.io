@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>bl stash save</title><link href="http://blog.benjaminlipton.com/" rel="alternate"></link><link href="http://blog.benjaminlipton.com/categories/freeipa.xml" rel="self"></link><id>http://blog.benjaminlipton.com/</id><updated>2016-09-01T00:00:00-04:00</updated><entry><title>"Thinking about templating, part 2: Handling missing data"</title><link href="http://blog.benjaminlipton.com/2016/09/01/rule-suppression.html" rel="alternate"></link><published>2016-09-01T00:00:00-04:00</published><updated>2016-09-01T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-09-01:2016/09/01/rule-suppression.html</id><summary type="html">&lt;div class="toc"&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>bl stash save - freeipa</title><link href="http://blog.benjaminlipton.com/" rel="alternate"></link><link href="http://blog.benjaminlipton.com/categories/freeipa.xml" rel="self"></link><id>http://blog.benjaminlipton.com/</id><updated>2016-09-01T00:00:00-04:00</updated><entry><title>Thinking about templating, part 2: Handling missing data</title><link href="http://blog.benjaminlipton.com/2016/09/01/rule-suppression.html" rel="alternate"></link><published>2016-09-01T00:00:00-04:00</published><updated>2016-09-01T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-09-01:/2016/09/01/rule-suppression.html</id><summary type="html">&lt;div class="toc"&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="#introduction"&gt;Introduction&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#simple-approach-data-rules-only"&gt;Simple approach: data rules only&lt;/a&gt;&lt;/li&gt;
@@ -15,7 +15,24 @@
 &lt;/div&gt;
 &lt;h2 id="introduction"&gt;Introduction&lt;/h2&gt;
 &lt;p&gt;This post is a followup to
-&lt;a href="{% post_url 2016-07-19-csr-generation-templating %}"&gt;Thinking about templating for automatic CSR generation&lt;/a&gt;.
+&lt;a href="http://blog.benjaminlipton.com/2016/07/19/csr-generation-templating.html"&gt;Thinking about templating for automatic CSR generation&lt;/a&gt;.
+In it we will look at a requirement of the templating system …&lt;/p&gt;</summary><content type="html">&lt;div class="toc"&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="#introduction"&gt;Introduction&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#simple-approach-data-rules-only"&gt;Simple approach: data rules only&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#current-solution-see-if-something-renders"&gt;Current solution: See if something renders&lt;/a&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#issues"&gt;Issues&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="#alternative-declare-data-dependencies"&gt;Alternative: Declare data dependencies&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#suppressing-excess-commas-and-newlines"&gt;Suppressing excess commas and newlines&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#conclusions"&gt;Conclusions&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#appendix"&gt;Appendix&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;h2 id="introduction"&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;This post is a followup to
+&lt;a href="http://blog.benjaminlipton.com/2016/07/19/csr-generation-templating.html"&gt;Thinking about templating for automatic CSR generation&lt;/a&gt;.
 In it we will look at a requirement of the templating system that was not
 discussed in that post, and see how it is handled by the implementation.&lt;/p&gt;
 &lt;p&gt;Sometimes you might want to generate a certificate for a principal that doesn't
@@ -280,7 +297,7 @@ data rules, and with whitespace added for readability, it turns into this:&lt;/p
 &lt;span class="x"&gt;[ &lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;name&lt;/span&gt; &lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt; ]&lt;/span&gt;
 &lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;contents&lt;/span&gt; -&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endmacro&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;</summary></entry><entry><title>Thinking about templating for automatic CSR generation</title><link href="http://blog.benjaminlipton.com/2016/07/19/csr-generation-templating.html" rel="alternate"></link><published>2016-07-19T00:00:00-04:00</published><updated>2016-07-19T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-07-19:2016/07/19/csr-generation-templating.html</id><summary type="html">&lt;div class="toc"&gt;
+&lt;/pre&gt;&lt;/div&gt;</content><category term="freeipa"></category></entry><entry><title>Thinking about templating for automatic CSR generation</title><link href="http://blog.benjaminlipton.com/2016/07/19/csr-generation-templating.html" rel="alternate"></link><published>2016-07-19T00:00:00-04:00</published><updated>2016-07-19T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-07-19:/2016/07/19/csr-generation-templating.html</id><summary type="html">&lt;div class="toc"&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="#background"&gt;Background&lt;/a&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a href="#requirements"&gt;Requirements&lt;/a&gt;&lt;/li&gt;
@@ -288,12 +305,50 @@ data rules, and with whitespace added for readability, it turns into this:&lt;/p
 &lt;/li&gt;
 &lt;li&gt;&lt;a href="#implementations"&gt;Implementations&lt;/a&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a href="#two-pass-data-interpolation"&gt;Two-pass data interpolation&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="#_1"&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#_2"&gt;&lt;/a&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a href="#two-pass-template-interpolation"&gt;Two-pass template interpolation&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#template-based-hierarchical-rules"&gt;Template-based hierarchical rules&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#formatter-based-hierarchical-rules"&gt;Formatter-based hierarchical rules&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
+&lt;li&gt;&lt;a href="#_3"&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#_4"&gt;&lt;/a&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a href="#conclusions"&gt;Conclusions&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;h2 id="background"&gt;Background&lt;/h2&gt;
+&lt;p&gt;I am working on a project
+(&lt;a href="https://fedorahosted.org/freeipa/ticket/4899"&gt;ticket&lt;/a&gt;,
+&lt;a href="http://www.freeipa.org/page/V4/Automatic_Certificate_Request_Generation"&gt;design&lt;/a&gt;)
+to simplify creating certificates in FreeIPA.  Currently administrators must
+generate a Certificate Signing Request (CSR) matching the type of certificate
+they wish to issue. They …&lt;/p&gt;</summary><content type="html">&lt;div class="toc"&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="#background"&gt;Background&lt;/a&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#requirements"&gt;Requirements&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="#implementations"&gt;Implementations&lt;/a&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#two-pass-data-interpolation"&gt;Two-pass data interpolation&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="#_1"&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#_2"&gt;&lt;/a&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#two-pass-template-interpolation"&gt;Two-pass template interpolation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#template-based-hierarchical-rules"&gt;Template-based hierarchical rules&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#formatter-based-hierarchical-rules"&gt;Formatter-based hierarchical rules&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="#_3"&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#_4"&gt;&lt;/a&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#conclusions"&gt;Conclusions&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;h2 id="background"&gt;Background&lt;/h2&gt;
@@ -327,28 +382,37 @@ implemented using the &lt;a href="http://jinja2.pocoo.org/"&gt;Jinja2&lt;/a&gt; 
 &lt;h3 id="requirements"&gt;Requirements&lt;/h3&gt;
 &lt;p&gt;We must at a minimum be able to generate two different types of configuration,
 the openssl config file:&lt;/p&gt;
-&lt;p&gt;```
-[ req ]
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;[ req ]
 prompt = no
-encrypt_key = no&lt;/p&gt;
-&lt;p&gt;distinguished_name = dn
-req_extensions = exts&lt;/p&gt;
-&lt;p&gt;[ dn ]
+encrypt_key = no
+
+distinguished_name = dn
+req_extensions = exts
+
+[ dn ]
 O=DOMAIN.EXAMPLE.COM
-CN=user&lt;/p&gt;
-&lt;p&gt;[ exts ]
-subjectAltName=@SAN&lt;/p&gt;
-&lt;p&gt;[ SAN ]
+CN=user
+
+[ exts ]
+subjectAltName=@SAN
+
+[ SAN ]
 email=user@example.com
-dirName=SANdn&lt;/p&gt;
-&lt;p&gt;[ SANdn ]
+dirName=SANdn
+
+[ SANdn ]
 1.DC=com
 2.DC=example
 CN=users
 UID=user
-```&lt;/p&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
 &lt;p&gt;and the certutil command line:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;certutil -R -a -s "CN=user,O=DOMAIN.EXAMPLE.COM" --extSAN "email:user@example.com,dn:UID=user;CN=users;DC=example;DC=com"&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;certutil -R -a -s &amp;quot;CN=user,O=DOMAIN.EXAMPLE.COM&amp;quot; --extSAN &amp;quot;email:user@example.com,dn:UID=user;CN=users;DC=example;DC=com&amp;quot;
+&lt;/pre&gt;&lt;/div&gt;
+
+
 &lt;p&gt;Some interesting things to note about these formats:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;The contents of an extension can be constructed from multiple sources, such
@@ -370,7 +434,10 @@ UID=user
 &lt;/ul&gt;
 &lt;h2 id="implementations"&gt;Implementations&lt;/h2&gt;
 &lt;h3 id="two-pass-data-interpolation"&gt;Two-pass data interpolation&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;((user data -&amp;gt; data rules) -&amp;gt; syntax rules) -&amp;gt; output&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;((user data -&amp;gt; data rules) -&amp;gt; syntax rules) -&amp;gt; output
+&lt;/pre&gt;&lt;/div&gt;
+
+
 &lt;p&gt;One way we can approach constructing one extension from multiple sources it to
 use two sets of rules - one rule for each data item that provides a value for
 the extension, and one rule specifying the name and syntax of the extension as
@@ -390,30 +457,44 @@ certificate for them. So, some kind of escaping is also needed, but it would be
 jinja2 template markup escaping, not the HTML escaping that jinja2 already
 supports.&lt;/p&gt;
 &lt;p&gt;Example data rules:&lt;/p&gt;
-&lt;p&gt;{% raw %}
-&lt;code&gt;email={{subject.email}}&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}&lt;/code&gt;
-{% endraw %}&lt;/p&gt;
-&lt;p&gt;Example syntax rules:
-{% raw %}
-&lt;code&gt;--extSAN {{values|join(',')}}&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;subjectAltName=@{{{% endraw %}{% raw %}'{% section %}'}}{{values|join('\n')}}{{{% endraw %}{% raw %}'{% endsection %}'}}&lt;/code&gt;
-{% endraw %}&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;email={{subject.email}}
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1 id="_1"&gt;&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Example syntax rules:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;--extSAN {{values|join(&amp;#39;,&amp;#39;)}}
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1 id="_2"&gt;&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;subjectAltName=@{{&amp;#39;{% section %}&amp;#39;}}{{values|join(&amp;#39;\n&amp;#39;)}}{{&amp;#39;{% endsection %}&amp;#39;}}
+&lt;/pre&gt;&lt;/div&gt;
+
+
 &lt;p&gt;That's a lot of braces! We have to escape the &lt;code&gt;section&lt;/code&gt; and &lt;code&gt;endsection&lt;/code&gt; tags
 sequences so they will appear verbatim in the final template, producing
 something like:&lt;/p&gt;
-&lt;p&gt;{% raw %}
-&lt;code&gt;subjectAltName=@{% section %}email={{subject.email}}
-URI={{subject.inetuserhttpurl}}{% endsection %}&lt;/code&gt;
-{% endraw %}
-If we used a different type of markup for the user data interpolation and for
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;subjectAltName=@{% section %}email={{subject.email}}
+URI={{subject.inetuserhttpurl}}{% endsection %}
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;If we used a different type of markup for the user data interpolation and for
 denoting sections, the escaping would not be necessary; however, we would still
 need to preprocess the &lt;code&gt;values&lt;/code&gt; to escape any jinja2 markup that comes from the
 user data, and we would still have two types of markup being used in parallel.&lt;/p&gt;
 &lt;p&gt;Note, too, that the &lt;code&gt;section&lt;/code&gt; tag does not exist yet in jinja2; it would need
 to be implemented as an extension.&lt;/p&gt;
 &lt;h3 id="two-pass-template-interpolation"&gt;Two-pass template interpolation&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;(user data -&amp;gt; (data rules -&amp;gt; syntax rules)) -&amp;gt; output&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;(user data -&amp;gt; (data rules -&amp;gt; syntax rules)) -&amp;gt; output
+&lt;/pre&gt;&lt;/div&gt;
+
+
 &lt;p&gt;Alternatively, we can do the substitution on the templates themselves before
 interpolating user data, building up one big template that we then render with
 the data from the database. This is safer because the user-specified data never
@@ -431,34 +512,35 @@ example rules given above would still be valid, but the &lt;code&gt;values&lt;/c
 data rules themselves rather than data rules with interpolated user data. And
 of course, the &lt;code&gt;values&lt;/code&gt; would not be escaped beforehand.&lt;/p&gt;
 &lt;h3 id="template-based-hierarchical-rules"&gt;Template-based hierarchical rules&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;user data -&amp;gt; collected rules -&amp;gt; output&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;user data -&amp;gt; collected rules -&amp;gt; output
+&lt;/pre&gt;&lt;/div&gt;
+
+
 &lt;p&gt;One way to get away from escaping and multiple evaluations is to redesign the
 template so that the order of its elements no longer matters. That is, the
 hierarchical relationships between data items, certificate extensions, and the
 CSR as a whole could be encoded using jinja2 tags. It's probably easiest to
 explain this idea with an example:&lt;/p&gt;
-&lt;p&gt;{% highlight jinja %}
-{% raw %}
-{% group req %}
-{% entry req %}extensions={% group exts %}{% endentry %}
-{% entry req %}distinguished_name={% group subjectDN %}{% endentry %}
-{% entry subjectDN %}O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}{% endentry %}
-{% entry exts %}subjectAltName=@{% group SAN %}{% endentry %}
-{% entry SAN %}email={{subject.email}}{% endentry %}
-{% entry SAN %}URI={{subject.inetuserhttpurl}}{% endentry %}
-{% endraw %}
-{% endhighlight %}&lt;/p&gt;
-&lt;p&gt;The config for certutil would be quite similar:
-{% highlight jinja %}
-{% raw %}
-certutil -R -a {% group opts %}
-{% entry opts %}-s {% group subjectDN %}{% endentry %}
-{% entry opts %}--extSAN {% group SAN %}{% endentry %}
-{% entry subjectDN %}CN={{subject.username}},O={{config.ipacertificatesubjectbase}}{% endentry %}
-{% entry SAN %}email:{{subject.email}}{% endentry %}
-{% entry SAN %}uri:{{subject.inetuserhttpurl}}{% endentry %}
-{% endraw %}
-{% endhighlight %}&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;req&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;req&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;extensions=&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;exts&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;req&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;distinguished_name=&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;subjectDN&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;subjectDN&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;O=&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;config.ipacertificatesubjectbase&lt;/span&gt;&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;\nCN=&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.username&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;exts&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;subjectAltName=@&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;SAN&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;SAN&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;email=&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.email&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;SAN&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;URI=&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.inetuserhttpurl&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The config for certutil would be quite similar:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;certutil -R -a &lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;opts&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;opts&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;-s &lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;subjectDN&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;opts&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;--extSAN &lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;SAN&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;subjectDN&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;CN=&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.username&lt;/span&gt;&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;,O=&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;config.ipacertificatesubjectbase&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;SAN&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;email:&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.email&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;SAN&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;uri:&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.inetuserhttpurl&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
 &lt;p&gt;Each CSR generation helper would have its own notion of "groups," which would
 be implemented as jinja2 extensions. The entries of a group would be collected
 and inserted into the group in whatever way was appropriate for that helper.
@@ -481,10 +563,13 @@ tags specified the hierarchy.&lt;/p&gt;
 rules will be anyway. However, #2 would need to be addressed in any actual
 implementation.&lt;/p&gt;
 &lt;h3 id="formatter-based-hierarchical-rules"&gt;Formatter-based hierarchical rules&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;user data -&amp;gt; low-level rule -&amp;gt; formatting code -&amp;gt; group objects
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;user data -&amp;gt; low-level rule -&amp;gt; formatting code -&amp;gt; group objects
 group objects -&amp;gt; higher-level rule -&amp;gt; formatting code -&amp;gt; group objects
 ...
-group objects -&amp;gt; top-level rule -&amp;gt; output&lt;/code&gt;&lt;/p&gt;
+group objects -&amp;gt; top-level rule -&amp;gt; output
+&lt;/pre&gt;&lt;/div&gt;
+
+
 &lt;p&gt;Instead of linking rules together into a hierarchy using tags, leaving it to
 the templating engine to interpret that structure, we could encode the
 structure in the rule entities themselves and use multiple evaluations to
@@ -492,7 +577,7 @@ handle the hierarchy in the formatter, before the data even gets to the
 templating engine. Each rule would be stored with the name of the group within
 which it should be rendered, as well as the names of any groups that the rule
 includes. For example, to adapt the rule
-&lt;code&gt;{% raw %}{% entry exts %}subjectAltName=@{% group SAN %}{% endentry %}{% endraw %}&lt;/code&gt;
+&lt;code&gt;{% entry exts %}subjectAltName=@{% group SAN %}{% endentry %}&lt;/code&gt;
 to this schema, we would say that it is an element of the "exts" group,
 and provides the "SAN" group. By linking up group elements to group providers,
 we construct a tree of rules.&lt;/p&gt;
@@ -506,21 +591,31 @@ section. This addresses concern #2 from the previous approach, because the
 tools of the jinja2 language are now available for expressing how to format the
 results of groups of rules.&lt;/p&gt;
 &lt;p&gt;Example leaf rules:&lt;/p&gt;
-&lt;p&gt;{% raw %}
-&lt;code&gt;group: SAN
-template: email={{subject.email}}&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;group: subjectDN
-template: O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}&lt;/code&gt;
-{% endraw %}&lt;/p&gt;
-&lt;p&gt;Example parent rules:
-{% raw %}
-&lt;code&gt;group: opts
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;group: SAN
+template: email={{subject.email}}
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1 id="_3"&gt;&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;group: subjectDN
+template: O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Example parent rules:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;group: opts
 groupProvided: SAN
-template: --extSAN {{ SAN|join(',') }}&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;group: exts
+template: --extSAN {{ SAN|join(&amp;#39;,&amp;#39;) }}
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1 id="_4"&gt;&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;group: exts
 groupProvided: SAN
-template: subjectAltName=@{{ SAN.section_name }}&lt;/code&gt;
-{% endraw %}&lt;/p&gt;
+template: subjectAltName=@{{ SAN.section_name }}
+&lt;/pre&gt;&lt;/div&gt;
+
+
 &lt;p&gt;This has several advantages over the two-pass interpolation approaches:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;Profiles are simpler to configure, because they just contain a list of
@@ -560,7 +655,12 @@ language to make that easier.&lt;/p&gt;
 &lt;p&gt;If you are interested in discussing any of these options, feel free to email me
 directly at the address below, or share your thoughts with the
 &lt;a href="https://www.redhat.com/mailman/listinfo/freeipa-devel"&gt;freeipa-devel mailing list&lt;/a&gt;.
-Thanks!&lt;/p&gt;</summary></entry><entry><title>FreeIPA and the 'subdir-objects' option</title><link href="http://blog.benjaminlipton.com/2016/06/14/automake.html" rel="alternate"></link><published>2016-06-14T00:00:00-04:00</published><updated>2016-06-14T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-06-14:2016/06/14/automake.html</id><summary type="html">&lt;p&gt;The subject of this blog post will be
+Thanks!&lt;/p&gt;</content><category term="freeipa"></category></entry><entry><title>FreeIPA and the 'subdir-objects' option</title><link href="http://blog.benjaminlipton.com/2016/06/14/automake.html" rel="alternate"></link><published>2016-06-14T00:00:00-04:00</published><updated>2016-06-14T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-06-14:/2016/06/14/automake.html</id><summary type="html">&lt;p&gt;The subject of this blog post will be
+&lt;a href="https://fedorahosted.org/freeipa/ticket/5873"&gt;FreeIPA Ticket #5873&lt;/a&gt;, a request
+to fix the warning messages produced when compiling FreeIPA:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;automake: warning: possible forward-incompatibility.
+automake: At least a source file is in a subdirectory, but the &amp;#39;subdir-objects&amp;#39;
+automake: automake option hasn&amp;#39;t been enabled.  For now, the corresponding …&lt;/pre&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;The subject of this blog post will be
 &lt;a href="https://fedorahosted.org/freeipa/ticket/5873"&gt;FreeIPA Ticket #5873&lt;/a&gt;, a request
 to fix the warning messages produced when compiling FreeIPA:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;automake: warning: possible forward-incompatibility.
@@ -1249,7 +1349,7 @@ in the automake repository that are supposed to fix the bug, but the last
 automake release was over a year ago, so no distros are using those patches and
 I haven't tested against them. Since there seems to be no good way to add this
 option until automake 1.16, and not having the option won't break anything
-until automake 2.0, it may be easiest to just leave it alone for now.&lt;/p&gt;</summary></entry><entry><title>Manually requesting certs from Dogtag with certmonger debug tools</title><link href="http://blog.benjaminlipton.com/2016/06/12/dogtag-requests.html" rel="alternate"></link><published>2016-06-12T00:00:00-04:00</published><updated>2016-06-12T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-06-12:2016/06/12/dogtag-requests.html</id><summary type="html">&lt;p&gt;This post records the results of some experimentation with the Dogtag API. Specifically, we will show how to authenticate against the API using credentials that are automatically generated by FreeIPA installation, how to use debug tools distributed with certmonger to issue certificates via the API, and a method of tweaking the created cert via the API parameters passed.&lt;/p&gt;
+until automake 2.0, it may be easiest to just leave it alone for now.&lt;/p&gt;</content><category term="freeipa"></category></entry><entry><title>Manually requesting certs from Dogtag with certmonger debug tools</title><link href="http://blog.benjaminlipton.com/2016/06/12/dogtag-requests.html" rel="alternate"></link><published>2016-06-12T00:00:00-04:00</published><updated>2016-06-12T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-06-12:/2016/06/12/dogtag-requests.html</id><summary type="html">&lt;p&gt;This post records the results some experimentation with the Dogtag API. Specifically, we will show how to authenticate against the API using credentials that are automatically generated by FreeIPA installation, how to use debug tools distributed with certmonger to issue certificates via the API, and a method of tweaking the …&lt;/p&gt;</summary><content type="html">&lt;p&gt;This post records the results some experimentation with the Dogtag API. Specifically, we will show how to authenticate against the API using credentials that are automatically generated by FreeIPA installation, how to use debug tools distributed with certmonger to issue certificates via the API, and a method of tweaking the created cert via the API parameters passed.&lt;/p&gt;
 &lt;h2 id="acquiring-the-tool"&gt;Acquiring the tool&lt;/h2&gt;
 &lt;p&gt;We will be using the &lt;code&gt;submit-d&lt;/code&gt; tool, included in the certmonger source distribution but not the binary packages. First we download the source and build it:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ git clone git://git.fedorahosted.org/git/certmonger.git
@@ -1315,7 +1415,7 @@ requestId: 31
 
 &lt;p&gt;We can approve the request with the &lt;code&gt;-A&lt;/code&gt; flag and receive the certificate:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ src/submit-d -u https://server.example.com:8443/ca/ee/ca -U https://server.example.com:8443/ca/agent/ca &lt;span class="se"&gt;\&lt;/span&gt;
-    -vv -d /tmp/certs -C ipaCert -a -T caServerCert -A 31
+    -vv -d /tmp/certs -C ipaCert -a -T caServerCert -A &lt;span class="m"&gt;31&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -1344,4 +1444,4 @@ What happens if we submit the request again, and then approve it with the modifi
             Not Before: Monday, June 13, 2016 2:50:46 AM GMT
             Not  After: Sunday, June 3, 2018 2:50:46 AM GMT
         Subject: CN=newname,O=EXAMPLE.COM
-&lt;/pre&gt;&lt;/div&gt;</summary></entry></feed>
+&lt;/pre&gt;&lt;/div&gt;</content><category term="freeipa"></category></entry></feed>
