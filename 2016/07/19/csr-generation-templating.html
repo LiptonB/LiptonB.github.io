@@ -65,20 +65,12 @@
 </li>
 <li><a href="#implementations">Implementations</a><ul>
 <li><a href="#two-pass-data-interpolation">Two-pass data interpolation</a></li>
-</ul>
-</li>
-<li><a href="#_1"></a></li>
-<li><a href="#_2"></a><ul>
 <li><a href="#two-pass-template-interpolation">Two-pass template interpolation</a></li>
 <li><a href="#template-based-hierarchical-rules">Template-based hierarchical rules</a></li>
 <li><a href="#formatter-based-hierarchical-rules">Formatter-based hierarchical rules</a></li>
 </ul>
 </li>
-<li><a href="#_3"></a></li>
-<li><a href="#_4"></a><ul>
 <li><a href="#conclusions">Conclusions</a></li>
-</ul>
-</li>
 </ul>
 </div>
 <h2 id="background">Background</h2>
@@ -188,21 +180,15 @@ jinja2 template markup escaping, not the HTML escaping that jinja2 already
 supports.</p>
 <p>Example data rules:</p>
 <div class="highlight"><pre><span></span>email={{subject.email}}
-</pre></div>
 
-
-<h1 id="_1"></h1>
-<div class="highlight"><pre><span></span>O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
+O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
 </pre></div>
 
 
 <p>Example syntax rules:</p>
 <div class="highlight"><pre><span></span>--extSAN {{values|join(&#39;,&#39;)}}
-</pre></div>
 
-
-<h1 id="_2"></h1>
-<div class="highlight"><pre><span></span>subjectAltName=@{{&#39;{% section %}&#39;}}{{values|join(&#39;\n&#39;)}}{{&#39;{% endsection %}&#39;}}
+subjectAltName=@{{&#39;{% section %}&#39;}}{{values|join(&#39;\n&#39;)}}{{&#39;{% endsection %}&#39;}}
 </pre></div>
 
 
@@ -323,11 +309,8 @@ results of groups of rules.</p>
 <p>Example leaf rules:</p>
 <div class="highlight"><pre><span></span>group: SAN
 template: email={{subject.email}}
-</pre></div>
 
-
-<h1 id="_3"></h1>
-<div class="highlight"><pre><span></span>group: subjectDN
+group: subjectDN
 template: O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
 </pre></div>
 
@@ -336,11 +319,8 @@ template: O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
 <div class="highlight"><pre><span></span>group: opts
 groupProvided: SAN
 template: --extSAN {{ SAN|join(&#39;,&#39;) }}
-</pre></div>
 
-
-<h1 id="_4"></h1>
-<div class="highlight"><pre><span></span>group: exts
+group: exts
 groupProvided: SAN
 template: subjectAltName=@{{ SAN.section_name }}
 </pre></div>

@@ -305,20 +305,12 @@ data rules, and with whitespace added for readability, it turns into this:&lt;/p
 &lt;/li&gt;
 &lt;li&gt;&lt;a href="#implementations"&gt;Implementations&lt;/a&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a href="#two-pass-data-interpolation"&gt;Two-pass data interpolation&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href="#_1"&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="#_2"&gt;&lt;/a&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a href="#two-pass-template-interpolation"&gt;Two-pass template interpolation&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#template-based-hierarchical-rules"&gt;Template-based hierarchical rules&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#formatter-based-hierarchical-rules"&gt;Formatter-based hierarchical rules&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
-&lt;li&gt;&lt;a href="#_3"&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="#_4"&gt;&lt;/a&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a href="#conclusions"&gt;Conclusions&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;h2 id="background"&gt;Background&lt;/h2&gt;
@@ -335,20 +327,12 @@ they wish to issue. They …&lt;/p&gt;</summary><content type="html">&lt;div cla
 &lt;/li&gt;
 &lt;li&gt;&lt;a href="#implementations"&gt;Implementations&lt;/a&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a href="#two-pass-data-interpolation"&gt;Two-pass data interpolation&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href="#_1"&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="#_2"&gt;&lt;/a&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a href="#two-pass-template-interpolation"&gt;Two-pass template interpolation&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#template-based-hierarchical-rules"&gt;Template-based hierarchical rules&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#formatter-based-hierarchical-rules"&gt;Formatter-based hierarchical rules&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
-&lt;li&gt;&lt;a href="#_3"&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="#_4"&gt;&lt;/a&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a href="#conclusions"&gt;Conclusions&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;h2 id="background"&gt;Background&lt;/h2&gt;
@@ -458,21 +442,15 @@ jinja2 template markup escaping, not the HTML escaping that jinja2 already
 supports.&lt;/p&gt;
 &lt;p&gt;Example data rules:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;email={{subject.email}}
-&lt;/pre&gt;&lt;/div&gt;
 
-
-&lt;h1 id="_1"&gt;&lt;/h1&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
+O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;Example syntax rules:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;--extSAN {{values|join(&amp;#39;,&amp;#39;)}}
-&lt;/pre&gt;&lt;/div&gt;
 
-
-&lt;h1 id="_2"&gt;&lt;/h1&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;subjectAltName=@{{&amp;#39;{% section %}&amp;#39;}}{{values|join(&amp;#39;\n&amp;#39;)}}{{&amp;#39;{% endsection %}&amp;#39;}}
+subjectAltName=@{{&amp;#39;{% section %}&amp;#39;}}{{values|join(&amp;#39;\n&amp;#39;)}}{{&amp;#39;{% endsection %}&amp;#39;}}
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -593,11 +571,8 @@ results of groups of rules.&lt;/p&gt;
 &lt;p&gt;Example leaf rules:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;group: SAN
 template: email={{subject.email}}
-&lt;/pre&gt;&lt;/div&gt;
 
-
-&lt;h1 id="_3"&gt;&lt;/h1&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;group: subjectDN
+group: subjectDN
 template: O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
 &lt;/pre&gt;&lt;/div&gt;
 
@@ -606,11 +581,8 @@ template: O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;group: opts
 groupProvided: SAN
 template: --extSAN {{ SAN|join(&amp;#39;,&amp;#39;) }}
-&lt;/pre&gt;&lt;/div&gt;
 
-
-&lt;h1 id="_4"&gt;&lt;/h1&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;group: exts
+group: exts
 groupProvided: SAN
 template: subjectAltName=@{{ SAN.section_name }}
 &lt;/pre&gt;&lt;/div&gt;
