@@ -115,15 +115,11 @@ Example data rules:
 
     email={{subject.email}}
 
-# 
-
     O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
 
 Example syntax rules:
 
     --extSAN {{values|join(',')}}
-
-# 
 
     subjectAltName=@{{'{% section %}'}}{{values|join('\n')}}{{'{% endsection %}'}}
 
@@ -250,8 +246,6 @@ Example leaf rules:
     group: SAN
     template: email={{subject.email}}
 
-# 
-
     group: subjectDN
     template: O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
 
@@ -260,8 +254,6 @@ Example parent rules:
     group: opts
     groupProvided: SAN
     template: --extSAN {{ SAN|join(',') }}
-
-# 
 
     group: exts
     groupProvided: SAN
