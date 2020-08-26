@@ -4,7 +4,30 @@ Status: draft
 
 Talk Outline
 ============
+- My first commit
+  - clone
+  - (edit)
+  - commit -a
+  - (edit)
+  - add
+  - commit
+  - push
+- More interactions
+  - pull
+  - log
+  - (edit)
+  - status
+  - add -p
+  - commit
+  - push (out of date)
+  - pull
+  - push
+- Working on a branch
+- Merge conflict
 - Commit history stuff (branches, merges, rebase, blah blah)
+  - A commit points to a version of the repository
+  - Commits have parents
+  - A branch points to a commit
 - Data storage stuff (index, objects, packing)
 - Merges and merge conflicts
 - Git LFS
@@ -16,6 +39,12 @@ Talk Outline
 
 Notes
 =====
+General approach ideas:
+- Walk through using the repo, with gradually more advanced examples
+  - Show a running visualization of the repo
+- Divide the commands into groups by concept
+- Talk about how it works internally, then do commands
+
 Types of object:
 - blobs (file data, zlib compressed)
 - trees (directories - contain names, modes, shas of blobs and other trees. also zlib compressed)
