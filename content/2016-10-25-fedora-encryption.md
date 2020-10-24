@@ -128,6 +128,7 @@ Create a btrfs filesystem on the encrypted partition and copy the data back to i
     luks-8d0f7036-74e7-4958-aaaf-36645dc30065    UUID=8d0f7036-74e7-4958-aaaf-36645dc30065    none
 
 Update kernel command line to trigger decryption:
+
     :::bash
     $ sudo vi /mnt/efi/EFI/fedora/grub.cfg
     # Copy first menuentry stanza, change kernelefi line to add:
@@ -136,10 +137,12 @@ Update kernel command line to trigger decryption:
 # Fix boot issues
 
 If we try to boot at this point, the process will get stuck, and eventually drop us in a dracut emergency shell. Exploring, we can see that there is no cryptsetup command in this initrd. We'll need to build a new initrd that has all of the tools needed for this boot process. Here's how I got it to work, after some trial and error. There are probably ways that are simpler or more independent of what kind of livecd you have, but the following works with a F24 livecd and F23 or F24 installed system.
+
 1. Boot livecd again
 2. Find the packages for the latest kernel installed on your system on koji: https://koji.fedoraproject.org/koji/buildinfo?buildID=807875
 3. Download kernel, kernel-core, and kernel-modules packages
 4. Build the new initrd:
+
     :::bash
     $ sudo dnf install ~/Downloads/*.rpm
     $ sudo mkdir /mnt/boot /mnt/efi
@@ -164,6 +167,5 @@ The booted system can generate the files it needs more cleanly than we could fro
 Reboot. All of the GRUB targets should now work correctly.
 
 # References
-[Fedora guide](https://fedoraproject.org/wiki/Disk_Encryption_User_Guide#Creating_Encrypted_Block_Devices_on_the_Installed_System_After_Installation)
-
-[Btrfs guide from Arch](https://wiki.archlinux.org/index.php/Dm-crypt/Encrypting_an_entire_system#Btrfs_subvolumes_with_swap)
+* [Fedora guide](https://fedoraproject.org/wiki/Disk_Encryption_User_Guide#Creating_Encrypted_Block_Devices_on_the_Installed_System_After_Installation)
+* [Btrfs guide from Arch](https://wiki.archlinux.org/index.php/Dm-crypt/Encrypting_an_entire_system#Btrfs_subvolumes_with_swap)
