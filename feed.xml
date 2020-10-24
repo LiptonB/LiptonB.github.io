@@ -89,7 +89,198 @@ I'd be stuck. Inserting the mSATA disk after Debian installer was booted didn't
 work either. It just caused the device to become nonresponsive - I think the
 mSATA controller might not support hotplugging. So, it seems like this
 installer USB works, but I'm still going to need a serial cable to install my
-router.&lt;/p&gt;</content><category term="system administration"></category><category term="Debian"></category></entry><entry><title>Thinking about templating, part 2: Handling missing data</title><link href="http://blog.benjaminlipton.com/2016/09/01/rule-suppression.html" rel="alternate"></link><published>2016-09-01T00:00:00-04:00</published><updated>2016-09-01T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-09-01:/2016/09/01/rule-suppression.html</id><summary type="html">&lt;div class="toc"&gt;
+router.&lt;/p&gt;</content><category term="system administration"></category><category term="Debian"></category></entry><entry><title>Encrypting a Fedora system post-install (with EFI and btrfs)</title><link href="http://blog.benjaminlipton.com/2016/10/25/fedora-encryption.html" rel="alternate"></link><published>2016-10-25T00:00:00-04:00</published><updated>2016-10-25T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-10-25:/2016/10/25/fedora-encryption.html</id><summary type="html">&lt;div class="toc"&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="#understanding-the-filesystem-structure"&gt;Understanding the filesystem structure&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#back-up-filesystem-data"&gt;Back up filesystem data&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#create-an-encrypted-filesystem-and-restore-data"&gt;Create an encrypted filesystem and restore data&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#fix-up-references-to-the-old-filesystem"&gt;Fix up references to the old filesystem&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#fix-boot-issues"&gt;Fix boot issues&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#cleanup"&gt;Cleanup&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#references"&gt;References&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;p&gt;I had a Fedora 23 system that I decided I would like to be encrypted. I could
+have just backed up my documents …&lt;/p&gt;</summary><content type="html">&lt;div class="toc"&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="#understanding-the-filesystem-structure"&gt;Understanding the filesystem structure&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#back-up-filesystem-data"&gt;Back up filesystem data&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#create-an-encrypted-filesystem-and-restore-data"&gt;Create an encrypted filesystem and restore data&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#fix-up-references-to-the-old-filesystem"&gt;Fix up references to the old filesystem&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#fix-boot-issues"&gt;Fix boot issues&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#cleanup"&gt;Cleanup&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#references"&gt;References&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;p&gt;I had a Fedora 23 system that I decided I would like to be encrypted. I could
+have just backed up my documents and reinstalled, but I decided it would be
+more interesting to create the encrypted partition myself. I happened to have
+decided to try out btrfs when installing this system, which turns out to have
+been convenient because a btrfs filesystem can be easily and accurately backed
+up to another btrfs filesystem using the &lt;code&gt;send&lt;/code&gt; and &lt;code&gt;receive&lt;/code&gt; commands.&lt;/p&gt;
+&lt;p&gt;The steps below show how to perform this backup, create the encrypted
+filesystem, restore the backup onto it, and then fix all the necessary system
+files to boot from the new, encrypted filesystem.&lt;/p&gt;
+&lt;h1 id="understanding-the-filesystem-structure"&gt;Understanding the filesystem structure&lt;/h1&gt;
+&lt;p&gt;Contents of &lt;code&gt;/etc/fstab&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;UUID=3563aec8-5a5b-48dd-a949-02de373a943d /                       btrfs   subvol=root     0 0
+UUID=c6a4c58a-b13d-4f93-9841-81b0b04d35ed /boot                   ext4    defaults        1 2
+UUID=1616-FDDC          /boot/efi               vfat    umask=0077,shortname=winnt 0 2
+UUID=3563aec8-5a5b-48dd-a949-02de373a943d /home                   btrfs   subvol=home     0 0
+UUID=2d4bc346-b2f2-4436-b583-230fb1ff5dba swap                    swap    defaults        0 0
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Let's check out the structure of this btrfs filesystem:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo btrfs subvolume list /
+ID 257 gen 93 top level 5 path root
+ID 258 gen 92 top level 5 path home
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;What are the physical partitions on the disk?&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo fdisk -l /dev/sda
+Disk /dev/sda: 20 GiB, 21474836480 bytes, 41943040 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: gpt
+Disk identifier: 3705552A-EB6B-444B-B58E-B4052B51BA48
+
+
+Device       Start      End  Sectors  Size Type
+/dev/sda1     2048   411647   409600  200M EFI System
+/dev/sda2   411648  1435647  1024000  500M Linux filesystem
+/dev/sda3  1435648  5629951  4194304    2G Linux swap
+/dev/sda4  5629952 41940991 36311040 17.3G Linux filesystem
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1 id="back-up-filesystem-data"&gt;Back up filesystem data&lt;/h1&gt;
+&lt;p&gt;For the next steps I booted from a
+Fedora 24 livecd and inserted a USB drive with enough space to hold the
+filesystem data.&lt;/p&gt;
+&lt;p&gt;Create a btrfs partition and mount it:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo fdisk /dev/sdb  # create a new linux partition
+$ sudo mkfs.btrfs /dev/sdb1
+$ sudo mkdir /mnt/fedora /mnt/backup
+$ sudo mount /dev/sda4 /mnt/fedora
+$ sudo mount /dev/sdb1 /mnt/backup
+$ ls /mnt/fedora/
+home  root
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Create read-only snapshots of the subvolumes:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo btrfs subvolume snapshot -r /mnt/fedora/root /mnt/fedora/rootBACKUP
+Create a readonly snapshot of &amp;#39;/mnt/fedora/root&amp;#39; in &amp;#39;/mnt/fedora/rootBACKUP&amp;#39;
+$ sudo btrfs subvolume snapshot -r /mnt/fedora/home /mnt/fedora/homeBACKUP
+Create a readonly snapshot of &amp;#39;/mnt/fedora/home&amp;#39; in &amp;#39;/mnt/fedora/homeBACKUP&amp;#39;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Back up the snapshots to the backup volume&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo btrfs send /mnt/fedora/rootBACKUP/ | sudo btrfs receive /mnt/backup/
+$ sudo btrfs send /mnt/fedora/homeBACKUP/ | sudo btrfs receive /mnt/backup/
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1 id="create-an-encrypted-filesystem-and-restore-data"&gt;Create an encrypted filesystem and restore data&lt;/h1&gt;
+&lt;p&gt;First, erase all the unencrypted data on the partition.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo dd if=/dev/zero of=/dev/sda4
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Format/encrypt the partition as a LUKS volume. You will be asked to set a passphrase.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo cryptsetup luksFormat /dev/sda4
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Unlock the volume. The decrypted partition will be accessible as &lt;code&gt;/dev/mapper/fedora&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo cryptsetup luksOpen /dev/sda4 fedora
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Create a btrfs filesystem on the encrypted partition and copy the data back to it&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo mkfs.btrfs /dev/mapper/fedora
+$ sudo mount /dev/mapper/fedora /mnt/fedora
+$ sudo btrfs send /mnt/backup/homeBACKUP/ | sudo btrfs receive /mnt/fedora/
+$ sudo btrfs send /mnt/backup/rootBACKUP/ | sudo btrfs receive /mnt/fedora/
+$ sudo mv /mnt/fedora/rootBACKUP/ /mnt/fedora/root
+$ sudo mv /mnt/fedora/homeBACKUP/ /mnt/fedora/home
+$ sudo btrfs subvolume list /mnt/fedora
+ID 257 gen 11 top level 5 path home
+ID 258 gen 24 top level 5 path root
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1 id="fix-up-references-to-the-old-filesystem"&gt;Fix up references to the old filesystem&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo blkid
+/dev/disk/by-label/Fedora-WS-Live-24-1-2: UUID=&amp;quot;2016-06-14-16-54-29-00&amp;quot; LABEL=&amp;quot;Fedora-WS-Live-24-1-2&amp;quot; TYPE=&amp;quot;iso9660&amp;quot; PTUUID=&amp;quot;537ee902&amp;quot; PTTYPE=&amp;quot;dos&amp;quot;
+/dev/sda1: SEC_TYPE=&amp;quot;msdos&amp;quot; UUID=&amp;quot;1616-FDDC&amp;quot; TYPE=&amp;quot;vfat&amp;quot; PARTLABEL=&amp;quot;EFI System Partition&amp;quot; PARTUUID=&amp;quot;5738d418-52f4-4b56-af99-1f4cf05518d0&amp;quot;
+/dev/sda2: UUID=&amp;quot;c6a4c58a-b13d-4f93-9841-81b0b04d35ed&amp;quot; TYPE=&amp;quot;ext4&amp;quot; PARTUUID=&amp;quot;8e130091-9e47-4eba-a5d1-fa4a5627fbfe&amp;quot;
+/dev/sda3: UUID=&amp;quot;2d4bc346-b2f2-4436-b583-230fb1ff5dba&amp;quot; TYPE=&amp;quot;swap&amp;quot; PARTUUID=&amp;quot;a6376260-7fee-42b0-87be-3f4da06f6f56&amp;quot;
+/dev/sda4: UUID=&amp;quot;8d0f7036-74e7-4958-aaaf-36645dc30065&amp;quot; TYPE=&amp;quot;crypto_LUKS&amp;quot; PARTUUID=&amp;quot;2f34589e-f169-4132-9ce2-147bc6d759ac&amp;quot;
+/dev/loop0: TYPE=&amp;quot;squashfs&amp;quot;
+/dev/loop1: LABEL=&amp;quot;Anaconda&amp;quot; UUID=&amp;quot;9234c2e3-f613-4534-8167-1a9671619b1a&amp;quot; TYPE=&amp;quot;ext4&amp;quot;
+/dev/loop2: TYPE=&amp;quot;DM_snapshot_cow&amp;quot;
+/dev/mapper/live-rw: LABEL=&amp;quot;Anaconda&amp;quot; UUID=&amp;quot;9234c2e3-f613-4534-8167-1a9671619b1a&amp;quot; TYPE=&amp;quot;ext4&amp;quot;
+/dev/mapper/live-base: LABEL=&amp;quot;Anaconda&amp;quot; UUID=&amp;quot;9234c2e3-f613-4534-8167-1a9671619b1a&amp;quot; TYPE=&amp;quot;ext4&amp;quot;
+/dev/sdb1: UUID=&amp;quot;07badae9-6502-4199-b426-35307774531e&amp;quot; UUID_SUB=&amp;quot;82bfec92-ff61-4d5d-a139-b7fd84a607c8&amp;quot; TYPE=&amp;quot;btrfs&amp;quot; PARTUUID=&amp;quot;46b95e2b-01&amp;quot;
+/dev/mapper/fedora: UUID=&amp;quot;3be747dc-7f36-4417-a475-4ef9d99e2ed0&amp;quot; UUID_SUB=&amp;quot;14ca7b00-26e6-4704-a047-1ae73474d52f&amp;quot; TYPE=&amp;quot;btrfs&amp;quot;
+
+$ cd /mnt/fedora/root
+$ sudo btrfs property set -ts /mnt/fedora/root ro false
+$ sudo btrfs property set -ts /mnt/fedora/home ro false
+$ sudo vi etc/fstab
+# Replace UUID in fstab with /dev/mapper/fedora UUID
+$ sudo vi etc/crypttab
+$ sudo cat etc/crypttab
+luks-8d0f7036-74e7-4958-aaaf-36645dc30065    UUID=8d0f7036-74e7-4958-aaaf-36645dc30065    none
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Update kernel command line to trigger decryption:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo vi /mnt/efi/EFI/fedora/grub.cfg
+&lt;span class="c1"&gt;# Copy first menuentry stanza, change kernelefi line to add:&lt;/span&gt;
+&lt;span class="nv"&gt;root&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;UUID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;3be747dc-7f36-4417-a475-4ef9d99e2ed0 rd.luks.uuid&lt;span class="o"&gt;=&lt;/span&gt;8d0f7036-74e7-4958-aaaf-36645dc30065
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1 id="fix-boot-issues"&gt;Fix boot issues&lt;/h1&gt;
+&lt;p&gt;If we try to boot at this point, the process will get stuck, and eventually drop us in a dracut emergency shell. Exploring, we can see that there is no cryptsetup command in this initrd. We'll need to build a new initrd that has all of the tools needed for this boot process. Here's how I got it to work, after some trial and error. There are probably ways that are simpler or more independent of what kind of livecd you have, but the following works with a F24 livecd and F23 or F24 installed system.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Boot livecd again&lt;/li&gt;
+&lt;li&gt;Find the packages for the latest kernel installed on your system on koji: https://koji.fedoraproject.org/koji/buildinfo?buildID=807875&lt;/li&gt;
+&lt;li&gt;Download kernel, kernel-core, and kernel-modules packages&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Build the new initrd:&lt;/p&gt;
+&lt;p&gt;:::bash
+$ sudo dnf install ~/Downloads/*.rpm
+$ sudo mkdir /mnt/boot /mnt/efi
+$ sudo mount /dev/sda1 /mnt/efi
+$ sudo mount /dev/sda2 /mnt/boot
+$ sudo dracut --add "crypt btrfs" --add-drivers "dm_crypt btrfs" /mnt/boot/initramfs-new 4.7.7-200.fc24.x86_64
+$ sudo vi /mnt/efi/EFI/fedora/grub.cfg  # change initrdefi line to /initramfs-new&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;At this point, you should be able to boot into the new system by selecting the LUKS entry from the grub menu and entering your LUKS passphrase at the prompt!&lt;/p&gt;
+&lt;h1 id="cleanup"&gt;Cleanup&lt;/h1&gt;
+&lt;p&gt;The booted system can generate the files it needs more cleanly than we could from the livecd, so recreate the initrds:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ sudo dracut --regenerate-all --force
+$ sudo vim /etc/default/grub
+&lt;span class="c1"&gt;# add rd.luks.uuid=8d0f7036-74e7-4958-aaaf-36645dc30065 to GRUB_CMDLINE_LINUX variable&lt;/span&gt;
+$ sudo grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
+$ sudo rm /boot/initramfs-new
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Reboot. All of the GRUB targets should now work correctly.&lt;/p&gt;
+&lt;h1 id="references"&gt;References&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://fedoraproject.org/wiki/Disk_Encryption_User_Guide#Creating_Encrypted_Block_Devices_on_the_Installed_System_After_Installation"&gt;Fedora guide&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://wiki.archlinux.org/index.php/Dm-crypt/Encrypting_an_entire_system#Btrfs_subvolumes_with_swap"&gt;Btrfs guide from Arch&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><category term="system administration"></category><category term="btrfs"></category><category term="EFI"></category><category term="Fedora"></category><category term="encryption"></category></entry><entry><title>Thinking about templating, part 2: Handling missing data</title><link href="http://blog.benjaminlipton.com/2016/09/01/rule-suppression.html" rel="alternate"></link><published>2016-09-01T00:00:00-04:00</published><updated>2016-09-01T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-09-01:/2016/09/01/rule-suppression.html</id><summary type="html">&lt;div class="toc"&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="#introduction"&gt;Introduction&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#simple-approach-data-rules-only"&gt;Simple approach: data rules only&lt;/a&gt;&lt;/li&gt;

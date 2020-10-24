@@ -20,7 +20,7 @@
         href="http://blog.benjaminlipton.com/feed.xml">
   <link rel="alternate" type="application/atom+xml" title="Categories Atom Feed"
         href="http://blog.benjaminlipton.com/categories/tools.xml">  
-  <meta name="description" content="Talk Outline Commit history stuff (branches, merges, rebase, blah blah) Data storage stuff (index, objects, packing) Merges and merge conflicts Git LFS Tips git add -p gitk/git instaweb/git log --graph --decorate git log --name-status Notes Types of object: - blobs (file data, zlib compressed) - trees (directories - contain names, modes …">
+  <meta name="description" content="Talk Outline My first commit clone (edit) commit -a (edit) add commit push More interactions pull log (edit) status add -p commit push (out of date) pull push Working on a branch Merge conflict Commit history stuff (branches, merges, rebase, blah blah) A commit points to a version of the …">
 
 
 </head>
@@ -59,7 +59,30 @@
     <div class="content">
       <h1 id="talk-outline">Talk Outline</h1>
 <ul>
+<li>My first commit</li>
+<li>clone</li>
+<li>(edit)</li>
+<li>commit -a</li>
+<li>(edit)</li>
+<li>add</li>
+<li>commit</li>
+<li>push</li>
+<li>More interactions</li>
+<li>pull</li>
+<li>log</li>
+<li>(edit)</li>
+<li>status</li>
+<li>add -p</li>
+<li>commit</li>
+<li>push (out of date)</li>
+<li>pull</li>
+<li>push</li>
+<li>Working on a branch</li>
+<li>Merge conflict</li>
 <li>Commit history stuff (branches, merges, rebase, blah blah)</li>
+<li>A commit points to a version of the repository</li>
+<li>Commits have parents</li>
+<li>A branch points to a commit</li>
 <li>Data storage stuff (index, objects, packing)</li>
 <li>Merges and merge conflicts</li>
 <li>Git LFS</li>
@@ -69,6 +92,11 @@
 <li>git log --name-status</li>
 </ul>
 <h1 id="notes">Notes</h1>
+<p>General approach ideas:
+- Walk through using the repo, with gradually more advanced examples
+  - Show a running visualization of the repo
+- Divide the commands into groups by concept
+- Talk about how it works internally, then do commands</p>
 <p>Types of object:
 - blobs (file data, zlib compressed)
 - trees (directories - contain names, modes, shas of blobs and other trees. also zlib compressed)
