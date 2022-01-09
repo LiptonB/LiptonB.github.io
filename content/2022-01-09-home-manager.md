@@ -13,6 +13,8 @@ Status: draft
 
 # Home-Manager Installation
 
+# ZSH File Conflict
+
 # Fixing Fingers
 
 # Tour of My Config
