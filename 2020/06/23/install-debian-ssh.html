@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <title>  Building a Custom Bootable USB to Install Debian over SSH | bl stash save
+  <title>  Building a Custom Bootable USB to Install Debian over SSH | Benjamin Lipton
 </title>
   <link rel="canonical" href="http://blog.benjaminlipton.com/2020/06/23/install-debian-ssh.html">
 
@@ -30,7 +30,7 @@
     <div class="container">
 <div class="row">
   <div class="col-sm-12">
-    <h1 class="title"><a href="http://blog.benjaminlipton.com/">bl stash save</a></h1>
+    <h1 class="title"><a href="http://blog.benjaminlipton.com/">Benjamin Lipton</a></h1>
   </div>
 </div>    </div>
   </header>
@@ -94,35 +94,34 @@ directly rather than re-packing the ISO.</p>
 <li>Download the preseed template: <code>wget -O preseed.cfg http://www.debian.org/releases/stable/example-preseed.txt</code></li>
 <li>
 <p>Configure the hostname and enable the network console in the preseed file:</p>
-<div class="highlight"><pre><span></span><span class="gd">--- example-preseed.txt 2020-01-12 10:42:06.000000000 -0500</span>
-<span class="gi">+++ preseed.cfg     2020-05-30 08:59:49.570798811 -0400</span>
-<span class="gu">@@ -65,8 +65,8 @@</span>
- # Any hostname and domain names assigned from dhcp take precedence over
- # values set here. However, setting the values still prevents the questions
- # from being shown, even if values come from dhcp.
-<span class="gd">-d-i netcfg/get_hostname string unassigned-hostname</span>
-<span class="gd">-d-i netcfg/get_domain string unassigned-domain</span>
-<span class="gi">+d-i netcfg/get_hostname string router</span>
-<span class="gi">+d-i netcfg/get_domain string example.com</span>
+<div class="highlight"><pre><span></span><code><span class="gd">--- example-preseed.txt 2020-01-12 10:42:06.000000000 -0500</span><span class="w"></span>
+<span class="gi">+++ preseed.cfg     2020-05-30 08:59:49.570798811 -0400</span><span class="w"></span>
+<span class="gu">@@ -65,8 +65,8 @@</span><span class="w"></span>
+<span class="w"> </span># Any hostname and domain names assigned from dhcp take precedence over<span class="w"></span>
+<span class="w"> </span># values set here. However, setting the values still prevents the questions<span class="w"></span>
+<span class="w"> </span># from being shown, even if values come from dhcp.<span class="w"></span>
+<span class="gd">-d-i netcfg/get_hostname string unassigned-hostname</span><span class="w"></span>
+<span class="gd">-d-i netcfg/get_domain string unassigned-domain</span><span class="w"></span>
+<span class="gi">+d-i netcfg/get_hostname string router</span><span class="w"></span>
+<span class="gi">+d-i netcfg/get_domain string example.com</span><span class="w"></span>
 
- # If you want to force a hostname, regardless of what either the DHCP
- # server returns or what the reverse DNS entry for the IP is, uncomment
-<span class="gu">@@ -87,10 +87,10 @@</span>
- # Use the following settings if you wish to make use of the network-console
- # component for remote installation over SSH. This only makes sense if you
- # intend to perform the remainder of the installation manually.
-<span class="gd">-#d-i anna/choose_modules string network-console</span>
-<span class="gi">+d-i anna/choose_modules string network-console</span>
- #d-i network-console/authorized_keys_url string http://10.0.0.1/openssh-key
-<span class="gd">-#d-i network-console/password password r00tme</span>
-<span class="gd">-#d-i network-console/password-again password r00tme</span>
-<span class="gi">+d-i network-console/password password install</span>
-<span class="gi">+d-i network-console/password-again password install</span>
+<span class="w"> </span># If you want to force a hostname, regardless of what either the DHCP<span class="w"></span>
+<span class="w"> </span># server returns or what the reverse DNS entry for the IP is, uncomment<span class="w"></span>
+<span class="gu">@@ -87,10 +87,10 @@</span><span class="w"></span>
+<span class="w"> </span># Use the following settings if you wish to make use of the network-console<span class="w"></span>
+<span class="w"> </span># component for remote installation over SSH. This only makes sense if you<span class="w"></span>
+<span class="w"> </span># intend to perform the remainder of the installation manually.<span class="w"></span>
+<span class="gd">-#d-i anna/choose_modules string network-console</span><span class="w"></span>
+<span class="gi">+d-i anna/choose_modules string network-console</span><span class="w"></span>
+<span class="w"> </span>#d-i network-console/authorized_keys_url string http://10.0.0.1/openssh-key<span class="w"></span>
+<span class="gd">-#d-i network-console/password password r00tme</span><span class="w"></span>
+<span class="gd">-#d-i network-console/password-again password r00tme</span><span class="w"></span>
+<span class="gi">+d-i network-console/password password install</span><span class="w"></span>
+<span class="gi">+d-i network-console/password-again password install</span><span class="w"></span>
 
- ### Mirror settings
- # If you select ftp, the mirror/country string does not need to be set.
-</pre></div>
-
+<span class="w"> </span>### Mirror settings<span class="w"></span>
+<span class="w"> </span># If you select ftp, the mirror/country string does not need to be set.<span class="w"></span>
+</code></pre></div>
 
 </li>
 <li>

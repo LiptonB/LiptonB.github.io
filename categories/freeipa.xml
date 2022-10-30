@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>bl stash save - freeipa</title><link href="http://blog.benjaminlipton.com/" rel="alternate"></link><link href="http://blog.benjaminlipton.com/categories/freeipa.xml" rel="self"></link><id>http://blog.benjaminlipton.com/</id><updated>2016-09-01T00:00:00-04:00</updated><entry><title>Thinking about templating, part 2: Handling missing data</title><link href="http://blog.benjaminlipton.com/2016/09/01/rule-suppression.html" rel="alternate"></link><published>2016-09-01T00:00:00-04:00</published><updated>2016-09-01T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-09-01:/2016/09/01/rule-suppression.html</id><summary type="html">&lt;div class="toc"&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Benjamin Lipton - freeipa</title><link href="http://blog.benjaminlipton.com/" rel="alternate"></link><link href="http://blog.benjaminlipton.com/categories/freeipa.xml" rel="self"></link><id>http://blog.benjaminlipton.com/</id><updated>2016-09-01T00:00:00-04:00</updated><entry><title>Thinking about templating, part 2: Handling missing data</title><link href="http://blog.benjaminlipton.com/2016/09/01/rule-suppression.html" rel="alternate"></link><published>2016-09-01T00:00:00-04:00</published><updated>2016-09-01T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-09-01:/2016/09/01/rule-suppression.html</id><summary type="html">&lt;div class="toc"&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="#introduction"&gt;Introduction&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#simple-approach-data-rules-only"&gt;Simple approach: data rules only&lt;/a&gt;&lt;/li&gt;
@@ -44,9 +44,8 @@ of config that have missing data.&lt;/p&gt;
 &lt;h2 id="simple-approach-data-rules-only"&gt;Simple approach: data rules only&lt;/h2&gt;
 &lt;p&gt;We can pretty simply update our data rules to do this partly right, like in
 this example:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nv"&gt;subject.fqdn.0&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;DNS = &lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.fqdn.0&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endif&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nv"&gt;subject.fqdn.0&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;DNS = &lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.fqdn.0&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endif&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;This adds some extra work for administrators creating new rules, and is another
 step that someone could forget, but could be manageble.&lt;/p&gt;
@@ -60,18 +59,16 @@ may depend on for different profiles; that all depends on the data rules.&lt;/p&
 tags to compute the output of any data rules first, then render their own text
 only if some data rule rendered successfully. In its raw form, this gets ugly
 (see [1] for explanation):&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;raw&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;{% set contents %}&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endraw&lt;/span&gt; &lt;span class="cp"&gt;%}{{&lt;/span&gt; &lt;span class="nv"&gt;datarules&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nf"&gt;join&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;\n&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;raw&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;{% set contents %}&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endraw&lt;/span&gt; &lt;span class="cp"&gt;%}{{&lt;/span&gt; &lt;span class="nv"&gt;datarules&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nf"&gt;join&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;\n&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;raw&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;{% endset %}{% if contents %}&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endraw&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="x"&gt;subjectAltName = @&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;call&lt;/span&gt; &lt;span class="nv"&gt;openssl.section&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;raw&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;{{ contents }}
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endraw&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;endcall&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;raw&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;{% endif %}&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endraw&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;For comparison, that rule used to look like this:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;subjectAltName = @&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;call&lt;/span&gt; &lt;span class="nv"&gt;openssl.section&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="x"&gt;subjectAltName = @&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;call&lt;/span&gt; &lt;span class="nv"&gt;openssl.section&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;datarules&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nf"&gt;join&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;\n&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endcall&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;I think this might be a heavy burden for administrators who want to write new
 syntax rules.&lt;/p&gt;
@@ -104,16 +101,14 @@ with some character in between, e.g.
 finally render this template with data, what if one of our datarules renders
 while another does not due to lack of data? The above rule segment would
 produce a template like:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;call&lt;/span&gt; &lt;span class="nv"&gt;ipa.datarule&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;email:&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;ipa.datafield&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;subject.mail.0&lt;/span&gt;&lt;span class="o"&gt;)|&lt;/span&gt;&lt;span class="nf"&gt;quote&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endcall&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;,&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;call&lt;/span&gt; &lt;span class="nv"&gt;ipa.datarule&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;uri:&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;ipa.datafield&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;subject.inetuserhttpurl.0&lt;/span&gt;&lt;span class="o"&gt;)|&lt;/span&gt;&lt;span class="nf"&gt;quote&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endcall&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;call&lt;/span&gt; &lt;span class="nv"&gt;ipa.datarule&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;email:&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;ipa.datafield&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;subject.mail.0&lt;/span&gt;&lt;span class="o"&gt;)|&lt;/span&gt;&lt;span class="nf"&gt;quote&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endcall&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;,&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;call&lt;/span&gt; &lt;span class="nv"&gt;ipa.datarule&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;uri:&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;ipa.datafield&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;subject.inetuserhttpurl.0&lt;/span&gt;&lt;span class="o"&gt;)|&lt;/span&gt;&lt;span class="nf"&gt;quote&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endcall&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;If this subject has no &lt;code&gt;inetuserhttpurl&lt;/code&gt; field, the second &lt;code&gt;ipa.datarule&lt;/code&gt; will
 be suppressed, leaving an empty string. But, the comma will still be there!
 This creates odd-looking output like the following:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;--extSAN email:myuser@example.com,
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;--extSAN email:myuser@example.com,
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Fortunately, certutil seems not to mind these extra commas, and openssl is also
 ok with the extra blank lines that arise the same way, so this isn't breaking
@@ -141,12 +136,11 @@ dependencies of all the data rules it was configured to include, the whole
 syntax rule could be suppressed if none of those items were available.&lt;/p&gt;
 &lt;p&gt;In this scheme, the template produced would look like (linebreaks and
 indentation added):&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nv"&gt;subject.mail.0&lt;/span&gt; &lt;span class="k"&gt;or&lt;/span&gt; &lt;span class="nv"&gt;subject.inethttpurl.0&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;--extSAN&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nv"&gt;subject.mail.0&lt;/span&gt; &lt;span class="k"&gt;or&lt;/span&gt; &lt;span class="nv"&gt;subject.inethttpurl.0&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;--extSAN&lt;/span&gt;
 &lt;span class="x"&gt;  &lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nv"&gt;subject.mail.0&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;email:&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.mail.0&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nf"&gt;quote&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endif&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;,&lt;/span&gt;
 &lt;span class="x"&gt;  &lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nv"&gt;subject.inethttpurl.0&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;uri:&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.inethttpurl.0&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nf"&gt;quote&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endif&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endif&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;This takes care of the third problem of the previous solution, because data
 rules with missing data will never be evaluated, meaning that superfluous
@@ -162,22 +156,20 @@ before that data is available. What we really want is to pass the &lt;em&gt;outp
 all the data rules to the join filter, &lt;em&gt;at final render time&lt;/em&gt;.&lt;/p&gt;
 &lt;p&gt;This is not a polished solution, but an image of what this could look like is
 for the data rule to be:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;--extSAN &lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;datarules&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nf"&gt;filternonempty&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;join(&amp;#39;,&amp;#39;)&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="x"&gt;--extSAN &lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;datarules&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nf"&gt;filternonempty&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;join(&amp;#39;,&amp;#39;)&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Which would create a final template like:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;filternonempty&lt;/span&gt; &lt;span class="nv"&gt;join&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;,&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;filternonempty&lt;/span&gt; &lt;span class="nv"&gt;join&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;,&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="x"&gt;&amp;lt;data rule 1&amp;gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;filterpart&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="x"&gt;&amp;lt;data rule 2&amp;gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endfilternonempty&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;And the &lt;code&gt;filternonempty&lt;/code&gt; tag would be implemented so the effect of this would
 be approximately:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="nv"&gt;parts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;[]&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="nv"&gt;parts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;[]&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="nv"&gt;part&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="x"&gt;&amp;lt;data rule 1&amp;gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endset&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
@@ -187,8 +179,7 @@ be approximately:&lt;/p&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endset&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nv"&gt;part&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="nv"&gt;parts.append&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;part&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;endif&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;parts&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nf"&gt;join&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;,&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;I think this is doable, but I don't have a prototype yet.&lt;/p&gt;
 &lt;h2 id="conclusions"&gt;Conclusions&lt;/h2&gt;
@@ -212,17 +203,16 @@ combination of data that's available.&lt;/p&gt;
 &lt;h2 id="appendix"&gt;Appendix&lt;/h2&gt;
 &lt;p&gt;[1] In case you're having trouble parsing this mess, when rendered to insert
 data rules, and with whitespace added for readability, it turns into this:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="nv"&gt;contents&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="nv"&gt;contents&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="x"&gt;    &lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nv"&gt;subject.mail.0&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;email = &lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.mail.0&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endif&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt; &amp;lt;-- this is the data rule&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endset&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nv"&gt;contents&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="x"&gt;    subjectAltName = @&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;call&lt;/span&gt; &lt;span class="nv"&gt;openssl.section&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="cp"&gt;%}{{&lt;/span&gt; &lt;span class="nv"&gt;contents&lt;/span&gt; &lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endcall&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endif&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;[2]&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="nv"&gt;rendersyntax&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;{}&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="nv"&gt;rendersyntax&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;{}&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="nv"&gt;renderdata&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;{}&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 
@@ -264,11 +254,10 @@ data rules, and with whitespace added for readability, it turns into this:&lt;/p
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="nv"&gt;renderdata.update&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;all&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kp"&gt;false&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; -&lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endif&lt;/span&gt; -&lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endmacro&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;[3]&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c"&gt;{# List containing rendered sections to be included at end #}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c"&gt;{# List containing rendered sections to be included at end #}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="nv"&gt;openssl_sections&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;[]&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 
 &lt;span class="c"&gt;{#&lt;/span&gt;
@@ -297,7 +286,7 @@ data rules, and with whitespace added for readability, it turns into this:&lt;/p
 &lt;span class="x"&gt;[ &lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;name&lt;/span&gt; &lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt; ]&lt;/span&gt;
 &lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;contents&lt;/span&gt; -&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endmacro&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;</content><category term="freeipa"></category></entry><entry><title>Thinking about templating for automatic CSR generation</title><link href="http://blog.benjaminlipton.com/2016/07/19/csr-generation-templating.html" rel="alternate"></link><published>2016-07-19T00:00:00-04:00</published><updated>2016-07-19T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-07-19:/2016/07/19/csr-generation-templating.html</id><summary type="html">&lt;div class="toc"&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="freeipa"></category></entry><entry><title>Thinking about templating for automatic CSR generation</title><link href="http://blog.benjaminlipton.com/2016/07/19/csr-generation-templating.html" rel="alternate"></link><published>2016-07-19T00:00:00-04:00</published><updated>2016-07-19T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-07-19:/2016/07/19/csr-generation-templating.html</id><summary type="html">&lt;div class="toc"&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="#background"&gt;Background&lt;/a&gt;&lt;ul&gt;
 &lt;li&gt;&lt;a href="#requirements"&gt;Requirements&lt;/a&gt;&lt;/li&gt;
@@ -366,7 +355,7 @@ implemented using the &lt;a href="http://jinja2.pocoo.org/"&gt;Jinja2&lt;/a&gt; 
 &lt;h3 id="requirements"&gt;Requirements&lt;/h3&gt;
 &lt;p&gt;We must at a minimum be able to generate two different types of configuration,
 the openssl config file:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;[ req ]
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;[ req ]
 prompt = no
 encrypt_key = no
 
@@ -389,13 +378,11 @@ dirName=SANdn
 2.DC=example
 CN=users
 UID=user
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;and the certutil command line:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;certutil -R -a -s &amp;quot;CN=user,O=DOMAIN.EXAMPLE.COM&amp;quot; --extSAN &amp;quot;email:user@example.com,dn:UID=user;CN=users;DC=example;DC=com&amp;quot;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;certutil -R -a -s &amp;quot;CN=user,O=DOMAIN.EXAMPLE.COM&amp;quot; --extSAN &amp;quot;email:user@example.com,dn:UID=user;CN=users;DC=example;DC=com&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Some interesting things to note about these formats:&lt;/p&gt;
 &lt;ul&gt;
@@ -418,9 +405,8 @@ UID=user
 &lt;/ul&gt;
 &lt;h2 id="implementations"&gt;Implementations&lt;/h2&gt;
 &lt;h3 id="two-pass-data-interpolation"&gt;Two-pass data interpolation&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;((user data -&amp;gt; data rules) -&amp;gt; syntax rules) -&amp;gt; output
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;((user data -&amp;gt; data rules) -&amp;gt; syntax rules) -&amp;gt; output
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;One way we can approach constructing one extension from multiple sources it to
 use two sets of rules - one rule for each data item that provides a value for
@@ -441,26 +427,23 @@ certificate for them. So, some kind of escaping is also needed, but it would be
 jinja2 template markup escaping, not the HTML escaping that jinja2 already
 supports.&lt;/p&gt;
 &lt;p&gt;Example data rules:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;email={{subject.email}}
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;email={{subject.email}}
 
 O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Example syntax rules:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;--extSAN {{values|join(&amp;#39;,&amp;#39;)}}
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;--extSAN {{values|join(&amp;#39;,&amp;#39;)}}
 
 subjectAltName=@{{&amp;#39;{% section %}&amp;#39;}}{{values|join(&amp;#39;\n&amp;#39;)}}{{&amp;#39;{% endsection %}&amp;#39;}}
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;That's a lot of braces! We have to escape the &lt;code&gt;section&lt;/code&gt; and &lt;code&gt;endsection&lt;/code&gt; tags
 sequences so they will appear verbatim in the final template, producing
 something like:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;subjectAltName=@{% section %}email={{subject.email}}
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;subjectAltName=@{% section %}email={{subject.email}}
 URI={{subject.inetuserhttpurl}}{% endsection %}
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;If we used a different type of markup for the user data interpolation and for
 denoting sections, the escaping would not be necessary; however, we would still
@@ -469,9 +452,8 @@ user data, and we would still have two types of markup being used in parallel.&l
 &lt;p&gt;Note, too, that the &lt;code&gt;section&lt;/code&gt; tag does not exist yet in jinja2; it would need
 to be implemented as an extension.&lt;/p&gt;
 &lt;h3 id="two-pass-template-interpolation"&gt;Two-pass template interpolation&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;(user data -&amp;gt; (data rules -&amp;gt; syntax rules)) -&amp;gt; output
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;(user data -&amp;gt; (data rules -&amp;gt; syntax rules)) -&amp;gt; output
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Alternatively, we can do the substitution on the templates themselves before
 interpolating user data, building up one big template that we then render with
@@ -490,34 +472,31 @@ example rules given above would still be valid, but the &lt;code&gt;values&lt;/c
 data rules themselves rather than data rules with interpolated user data. And
 of course, the &lt;code&gt;values&lt;/code&gt; would not be escaped beforehand.&lt;/p&gt;
 &lt;h3 id="template-based-hierarchical-rules"&gt;Template-based hierarchical rules&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;user data -&amp;gt; collected rules -&amp;gt; output
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;user data -&amp;gt; collected rules -&amp;gt; output
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;One way to get away from escaping and multiple evaluations is to redesign the
 template so that the order of its elements no longer matters. That is, the
 hierarchical relationships between data items, certificate extensions, and the
 CSR as a whole could be encoded using jinja2 tags. It's probably easiest to
 explain this idea with an example:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;req&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;req&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;req&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;extensions=&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;exts&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;req&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;distinguished_name=&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;subjectDN&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;subjectDN&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;O=&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;config.ipacertificatesubjectbase&lt;/span&gt;&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;\nCN=&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.username&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;exts&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;subjectAltName=@&lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;SAN&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;SAN&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;email=&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.email&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;SAN&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;URI=&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.inetuserhttpurl&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;The config for certutil would be quite similar:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;certutil -R -a &lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;opts&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="x"&gt;certutil -R -a &lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;opts&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;opts&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;-s &lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;subjectDN&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;opts&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;--extSAN &lt;/span&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="nv"&gt;SAN&lt;/span&gt; &lt;span class="cp"&gt;%}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;subjectDN&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;CN=&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.username&lt;/span&gt;&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;,O=&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;config.ipacertificatesubjectbase&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;SAN&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;email:&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.email&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
 &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;entry&lt;/span&gt; &lt;span class="nv"&gt;SAN&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;uri:&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;subject.inetuserhttpurl&lt;/span&gt;&lt;span class="cp"&gt;}}{%&lt;/span&gt; &lt;span class="k"&gt;endentry&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Each CSR generation helper would have its own notion of "groups," which would
 be implemented as jinja2 extensions. The entries of a group would be collected
@@ -541,12 +520,11 @@ tags specified the hierarchy.&lt;/p&gt;
 rules will be anyway. However, #2 would need to be addressed in any actual
 implementation.&lt;/p&gt;
 &lt;h3 id="formatter-based-hierarchical-rules"&gt;Formatter-based hierarchical rules&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;user data -&amp;gt; low-level rule -&amp;gt; formatting code -&amp;gt; group objects
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;user data -&amp;gt; low-level rule -&amp;gt; formatting code -&amp;gt; group objects
 group objects -&amp;gt; higher-level rule -&amp;gt; formatting code -&amp;gt; group objects
 ...
 group objects -&amp;gt; top-level rule -&amp;gt; output
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Instead of linking rules together into a hierarchy using tags, leaving it to
 the templating engine to interpret that structure, we could encode the
@@ -569,24 +547,22 @@ section. This addresses concern #2 from the previous approach, because the
 tools of the jinja2 language are now available for expressing how to format the
 results of groups of rules.&lt;/p&gt;
 &lt;p&gt;Example leaf rules:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;group: SAN
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;group: SAN
 template: email={{subject.email}}
 
 group: subjectDN
 template: O={{config.ipacertificatesubjectbase}}\nCN={{subject.username}}
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Example parent rules:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;group: opts
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;group: opts
 groupProvided: SAN
 template: --extSAN {{ SAN|join(&amp;#39;,&amp;#39;) }}
 
 group: exts
 groupProvided: SAN
 template: subjectAltName=@{{ SAN.section_name }}
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;This has several advantages over the two-pass interpolation approaches:&lt;/p&gt;
 &lt;ol&gt;
@@ -630,12 +606,12 @@ directly at the address below, or share your thoughts with the
 Thanks!&lt;/p&gt;</content><category term="freeipa"></category></entry><entry><title>FreeIPA and the 'subdir-objects' option</title><link href="http://blog.benjaminlipton.com/2016/06/14/automake.html" rel="alternate"></link><published>2016-06-14T00:00:00-04:00</published><updated>2016-06-14T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-06-14:/2016/06/14/automake.html</id><summary type="html">&lt;p&gt;The subject of this blog post will be
 &lt;a href="https://fedorahosted.org/freeipa/ticket/5873"&gt;FreeIPA Ticket #5873&lt;/a&gt;, a request
 to fix the warning messages produced when compiling FreeIPA:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;automake: warning: possible forward-incompatibility.
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;automake: warning: possible forward-incompatibility.
 automake: At least a source file is in a subdirectory, but the &amp;#39;subdir-objects&amp;#39;
-automake: automake option hasn&amp;#39;t been enabled.  For now, the corresponding …&lt;/pre&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;The subject of this blog post will be
+automake: automake option hasn&amp;#39;t been enabled.  For now, the corresponding …&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;The subject of this blog post will be
 &lt;a href="https://fedorahosted.org/freeipa/ticket/5873"&gt;FreeIPA Ticket #5873&lt;/a&gt;, a request
 to fix the warning messages produced when compiling FreeIPA:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;automake: warning: possible forward-incompatibility.
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;automake: warning: possible forward-incompatibility.
 automake: At least a source file is in a subdirectory, but the &amp;#39;subdir-objects&amp;#39;
 automake: automake option hasn&amp;#39;t been enabled.  For now, the corresponding output
 automake: object file(s) will be placed in the top-level directory.  However,
@@ -644,51 +620,47 @@ automake: unconditionally cause object files to be placed in the same subdirecto
 automake: of the corresponding sources.
 automake: You are advised to start using &amp;#39;subdir-objects&amp;#39; option throughout your
 automake: project, to avoid future incompatibilities.
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h2 id="step-1-add-subdir-objects"&gt;Step 1: Add 'subdir-objects'&lt;/h2&gt;
 &lt;p&gt;It says we should enable the &lt;code&gt;subdir-objects&lt;/code&gt; option, so let's try it:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gh"&gt;diff --git a/client/configure.ac b/client/configure.ac&lt;/span&gt;
-&lt;span class="gh"&gt;index 58f23af..a97edd1 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/client/configure.ac&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/client/configure.ac&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -8,7 +8,7 @@ LT_INIT&lt;/span&gt;
- AC_CONFIG_HEADERS([config.h])
- AC_CONFIG_SUBDIRS([../asn1])
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gh"&gt;diff --git a/client/configure.ac b/client/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 58f23af..a97edd1 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/client/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/client/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -8,7 +8,7 @@ LT_INIT&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_HEADERS([config.h])&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_SUBDIRS([../asn1])&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;
-&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;
+&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_MAINTAINER_MODE
+&lt;span class="w"&gt; &lt;/span&gt;AM_MAINTAINER_MODE&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gh"&gt;diff --git a/daemons/configure.ac b/daemons/configure.ac&lt;/span&gt;
-&lt;span class="gh"&gt;index 2906def..8dce469 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/daemons/configure.ac&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/daemons/configure.ac&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -7,7 +7,7 @@ AC_INIT([ipa-server],&lt;/span&gt;
- AC_CONFIG_HEADERS([config.h])
- AC_CONFIG_SUBDIRS([../asn1])
+&lt;span class="gh"&gt;diff --git a/daemons/configure.ac b/daemons/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 2906def..8dce469 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/daemons/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/daemons/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -7,7 +7,7 @@ AC_INIT([ipa-server],&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_HEADERS([config.h])&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_SUBDIRS([../asn1])&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;
-&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;
- m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
+&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_MAINTAINER_MODE
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;span class="w"&gt; &lt;/span&gt;AM_MAINTAINER_MODE&lt;span class="w"&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;And the result:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;make[1]: Entering directory &amp;#39;/home/blipton/src/freeipa/dist/freeipa-4.3.90.201606021746GIT63b597d/client&amp;#39;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;make[1]: Entering directory &amp;#39;/home/blipton/src/freeipa/dist/freeipa-4.3.90.201606021746GIT63b597d/client&amp;#39;
 Makefile:704: ../util/.deps/ipa_krb5.Po: No such file or directory
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;So what's happening here? If we search for the missing file:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ find -name ipa_krb5.Po
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ find -name ipa_krb5.Po
 ./client/&lt;span class="k"&gt;$(&lt;/span&gt;KRB5_UTIL_DIR&lt;span class="k"&gt;)&lt;/span&gt;/.deps/ipa_krb5.Po
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;we see that it's in a very odd place, a directory literally named
 &lt;code&gt;$(KRB5_UTIL_DIR)&lt;/code&gt;. It turns out this is a known issue with automatic
@@ -702,102 +674,100 @@ which this is derived includes, say, &lt;code&gt;$(KRB5_UTIL_DIR)/ipa_krb5.c&lt;
 config.status ends up making the oddly-named directory mentioned above.&lt;/p&gt;
 &lt;h2 id="step-2-no-variables-in-paths"&gt;Step 2: No variables in paths&lt;/h2&gt;
 &lt;p&gt;Ok, so we can't use variable references in our SOURCES. What if we expand all the variables, like this?&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gh"&gt;diff --git a/client/Makefile.am b/client/Makefile.am&lt;/span&gt;
-&lt;span class="gh"&gt;index 3d135a3..3c9f4bb 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/client/Makefile.am&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/client/Makefile.am&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -13,7 +13,7 @@ endif&lt;/span&gt;
- export AM_CFLAGS
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gh"&gt;diff --git a/client/Makefile.am b/client/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 3d135a3..3c9f4bb 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/client/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/client/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -13,7 +13,7 @@ endif&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;export AM_CFLAGS&lt;span class="w"&gt;&lt;/span&gt;
 
- KRB5_UTIL_DIR=../util
-&lt;span class="gd"&gt;-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c&lt;/span&gt;
-&lt;span class="gi"&gt;+KRB5_UTIL_SRCS=../util/ipa_krb5.c&lt;/span&gt;
- ASN1_UTIL_DIR=../asn1
- IPA_CONF_FILE=$(sysconfdir)/ipa/default.conf
+&lt;span class="w"&gt; &lt;/span&gt;KRB5_UTIL_DIR=../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+KRB5_UTIL_SRCS=../util/ipa_krb5.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ASN1_UTIL_DIR=../asn1&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;IPA_CONF_FILE=$(sysconfdir)/ipa/default.conf&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gh"&gt;diff --git a/client/configure.ac b/client/configure.ac&lt;/span&gt;
-&lt;span class="gh"&gt;index 58f23af..a97edd1 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/client/configure.ac&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/client/configure.ac&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -8,7 +8,7 @@ LT_INIT&lt;/span&gt;
- AC_CONFIG_HEADERS([config.h])
- AC_CONFIG_SUBDIRS([../asn1])
+&lt;span class="gh"&gt;diff --git a/client/configure.ac b/client/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 58f23af..a97edd1 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/client/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/client/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -8,7 +8,7 @@ LT_INIT&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_HEADERS([config.h])&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_SUBDIRS([../asn1])&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;
-&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;
+&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_MAINTAINER_MODE
+&lt;span class="w"&gt; &lt;/span&gt;AM_MAINTAINER_MODE&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gh"&gt;diff --git a/daemons/configure.ac b/daemons/configure.ac&lt;/span&gt;
-&lt;span class="gh"&gt;index 2906def..8dce469 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/daemons/configure.ac&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/daemons/configure.ac&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -7,7 +7,7 @@ AC_INIT([ipa-server],&lt;/span&gt;
- AC_CONFIG_HEADERS([config.h])
- AC_CONFIG_SUBDIRS([../asn1])
+&lt;span class="gh"&gt;diff --git a/daemons/configure.ac b/daemons/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 2906def..8dce469 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/daemons/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/daemons/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -7,7 +7,7 @@ AC_INIT([ipa-server],&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_HEADERS([config.h])&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_SUBDIRS([../asn1])&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;
-&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;
- m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
+&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_MAINTAINER_MODE
-&lt;span class="gh"&gt;diff --git a/daemons/ipa-kdb/Makefile.am b/daemons/ipa-kdb/Makefile.am&lt;/span&gt;
-&lt;span class="gh"&gt;index a4ea366..a4a970a 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/daemons/ipa-kdb/Makefile.am&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/daemons/ipa-kdb/Makefile.am&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -2,8 +2,8 @@ NULL =&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AM_MAINTAINER_MODE&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/daemons/ipa-kdb/Makefile.am b/daemons/ipa-kdb/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index a4ea366..a4a970a 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/daemons/ipa-kdb/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/daemons/ipa-kdb/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -2,8 +2,8 @@ NULL =&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- KRB5_UTIL_DIR = ../../util
- IPA_UTIL_DIR = ../../../util
-&lt;span class="gd"&gt;-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \&lt;/span&gt;
-&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd.c&lt;/span&gt;
-&lt;span class="gi"&gt;+KRB5_UTIL_SRCS = ../../util/ipa_krb5.c \&lt;/span&gt;
-&lt;span class="gi"&gt;+        ../../util/ipa_pwd.c&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;KRB5_UTIL_DIR = ../../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;IPA_UTIL_DIR = ../../../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+KRB5_UTIL_SRCS = ../../util/ipa_krb5.c \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+        ../../util/ipa_pwd.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_CPPFLAGS =                      \
-    -I.                     \
-&lt;span class="gh"&gt;diff --git a/daemons/ipa-sam/Makefile.am b/daemons/ipa-sam/Makefile.am&lt;/span&gt;
-&lt;span class="gh"&gt;index ea14661..66ffdff 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/daemons/ipa-sam/Makefile.am&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/daemons/ipa-sam/Makefile.am&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -7,7 +7,7 @@ SAMBA40EXTRA_LIBS = $(SAMBA40EXTRA_LIBPATH) \&lt;/span&gt;
-            $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;AM_CPPFLAGS =                      \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   -I.                     \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/daemons/ipa-sam/Makefile.am b/daemons/ipa-sam/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index ea14661..66ffdff 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/daemons/ipa-sam/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/daemons/ipa-sam/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -7,7 +7,7 @@ SAMBA40EXTRA_LIBS = $(SAMBA40EXTRA_LIBPATH) \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;           $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- KRB5_UTIL_DIR=../../util
-&lt;span class="gd"&gt;-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c&lt;/span&gt;
-&lt;span class="gi"&gt;+KRB5_UTIL_SRCS=../../util/ipa_krb5.c ../../util/ipa_pwd_ntlm.c&lt;/span&gt;
- ASN1_UTIL_DIR=../../asn1
+&lt;span class="w"&gt; &lt;/span&gt;KRB5_UTIL_DIR=../../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+KRB5_UTIL_SRCS=../../util/ipa_krb5.c ../../util/ipa_pwd_ntlm.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ASN1_UTIL_DIR=../../asn1&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_CPPFLAGS =                      \
-&lt;span class="gh"&gt;diff --git a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;
-&lt;span class="gh"&gt;index 46a6491..cf0ffbd 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -3,9 +3,9 @@ NULL =&lt;/span&gt;
- MAINTAINERCLEANFILES = *~ Makefile.in
- PLUGIN_COMMON_DIR = ../common
- KRB5_UTIL_DIR = ../../../util
-&lt;span class="gd"&gt;-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \&lt;/span&gt;
-&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd.c \&lt;/span&gt;
-&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c&lt;/span&gt;
-&lt;span class="gi"&gt;+KRB5_UTIL_SRCS = ../../../util/ipa_krb5.c \&lt;/span&gt;
-&lt;span class="gi"&gt;+        ../../../util/ipa_pwd.c \&lt;/span&gt;
-&lt;span class="gi"&gt;+        ../../../util/ipa_pwd_ntlm.c&lt;/span&gt;
- ASN1_UTIL_DIR=../../../asn1
+&lt;span class="w"&gt; &lt;/span&gt;AM_CPPFLAGS =                      \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 46a6491..cf0ffbd 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -3,9 +3,9 @@ NULL =&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;MAINTAINERCLEANFILES = *~ Makefile.in&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;PLUGIN_COMMON_DIR = ../common&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;KRB5_UTIL_DIR = ../../../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd.c \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+KRB5_UTIL_SRCS = ../../../util/ipa_krb5.c \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+        ../../../util/ipa_pwd.c \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+        ../../../util/ipa_pwd_ntlm.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ASN1_UTIL_DIR=../../../asn1&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_CPPFLAGS =                          \
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;span class="w"&gt; &lt;/span&gt;AM_CPPFLAGS =                          \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Now we have a different problem:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Making distclean in ipa-pwd-extop
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Making distclean in ipa-pwd-extop
 make[3]: Entering directory &amp;#39;/home/blipton/src/freeipa/dist/freeipa-4.3.90.201606021827GIT4becc18/daemons/ipa-slapi-plugins/ipa-pwd-extop&amp;#39;
 Makefile:535: ../../../util/.deps/ipa_krb5.Plo: No such file or directory
 Makefile:536: ../../../util/.deps/ipa_pwd.Plo: No such file or directory
 Makefile:537: ../../../util/.deps/ipa_pwd_ntlm.Plo: No such file or directory
 make[3]: *** No rule to make target &amp;#39;../../../util/.deps/ipa_pwd_ntlm.Plo&amp;#39;.  Stop.
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Here it turns out that because &lt;code&gt;util/.deps&lt;/code&gt; is used by more than one Makefile in
 the subdirectories of &lt;code&gt;daemons&lt;/code&gt;, it is being removed by &lt;code&gt;make distclean&lt;/code&gt; running
@@ -814,246 +784,244 @@ up the same files. So maybe it would be better to make utils its own project,
 repsonsible for building the files within that directory, and simply have the
 other projects depend on it. This is the same as what happens in the &lt;code&gt;asn1&lt;/code&gt;
 directory of the source tree. The following patch implements this approach:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gh"&gt;diff --git a/Makefile b/Makefile&lt;/span&gt;
-&lt;span class="gh"&gt;index 210b7ac..6e00220 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/Makefile&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/Makefile&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -3,7 +3,7 @@&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gh"&gt;diff --git a/Makefile b/Makefile&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 210b7ac..6e00220 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/Makefile&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/Makefile&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -3,7 +3,7 @@&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- include VERSION
+&lt;span class="w"&gt; &lt;/span&gt;include VERSION&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gd"&gt;-SUBDIRS=asn1 daemons install ipapython ipalib&lt;/span&gt;
-&lt;span class="gi"&gt;+SUBDIRS=util asn1 daemons install ipapython ipalib&lt;/span&gt;
- CLIENTDIRS=ipapython ipalib client asn1
- CLIENTPYDIRS=ipaclient ipaplatform
+&lt;span class="gd"&gt;-SUBDIRS=asn1 daemons install ipapython ipalib&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+SUBDIRS=util asn1 daemons install ipapython ipalib&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;CLIENTDIRS=ipapython ipalib client asn1&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;CLIENTPYDIRS=ipaclient ipaplatform&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gh"&gt;diff --git a/client/Makefile.am b/client/Makefile.am&lt;/span&gt;
-&lt;span class="gh"&gt;index 3d135a3..afc2977 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/client/Makefile.am&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/client/Makefile.am&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -13,7 +13,7 @@ endif&lt;/span&gt;
- export AM_CFLAGS
+&lt;span class="gh"&gt;diff --git a/client/Makefile.am b/client/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 3d135a3..afc2977 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/client/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/client/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -13,7 +13,7 @@ endif&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;export AM_CFLAGS&lt;span class="w"&gt;&lt;/span&gt;
 
- KRB5_UTIL_DIR=../util
-&lt;span class="gd"&gt;-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c&lt;/span&gt;
-&lt;span class="gi"&gt;+KRB5_UTIL_LIBS=../util/ipa_krb5.la&lt;/span&gt;
- ASN1_UTIL_DIR=../asn1
- IPA_CONF_FILE=$(sysconfdir)/ipa/default.conf
+&lt;span class="w"&gt; &lt;/span&gt;KRB5_UTIL_DIR=../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+KRB5_UTIL_LIBS=../util/ipa_krb5.la&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ASN1_UTIL_DIR=../asn1&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;IPA_CONF_FILE=$(sysconfdir)/ipa/default.conf&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gu"&gt;@@ -52,7 +52,6 @@ sbin_SCRIPTS =            \&lt;/span&gt;
- ipa_getkeytab_SOURCES =        \
-    ipa-getkeytab.c     \
-    ipa-client-common.c \
-&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)   \&lt;/span&gt;
-    $(NULL)
+&lt;span class="gu"&gt;@@ -52,7 +52,6 @@ sbin_SCRIPTS =            \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ipa_getkeytab_SOURCES =        \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   ipa-getkeytab.c     \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   ipa-client-common.c \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)   \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- ipa_getkeytab_LDADD =      \
-&lt;span class="gu"&gt;@@ -63,6 +62,7 @@ ipa_getkeytab_LDADD =         \&lt;/span&gt;
-    $(POPT_LIBS)        \
-    $(LIBINTL_LIBS)         \
-    $(INI_LIBS)     \
-&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)   \&lt;/span&gt;
-    $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;ipa_getkeytab_LDADD =      \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -63,6 +62,7 @@ ipa_getkeytab_LDADD =         \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(POPT_LIBS)        \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(LIBINTL_LIBS)         \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(INI_LIBS)     \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)   \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- ipa_rmkeytab_SOURCES =     \
-&lt;span class="gh"&gt;diff --git a/client/configure.ac b/client/configure.ac&lt;/span&gt;
-&lt;span class="gh"&gt;index 58f23af..836cac4 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/client/configure.ac&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/client/configure.ac&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -6,9 +6,9 @@ AC_INIT([ipa-client],&lt;/span&gt;
- LT_INIT
+&lt;span class="w"&gt; &lt;/span&gt;ipa_rmkeytab_SOURCES =     \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/client/configure.ac b/client/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 58f23af..836cac4 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/client/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/client/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -6,9 +6,9 @@ AC_INIT([ipa-client],&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;LT_INIT&lt;span class="w"&gt;&lt;/span&gt;
 
- AC_CONFIG_HEADERS([config.h])
-&lt;span class="gd"&gt;-AC_CONFIG_SUBDIRS([../asn1])&lt;/span&gt;
-&lt;span class="gi"&gt;+AC_CONFIG_SUBDIRS([../util ../asn1])&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_HEADERS([config.h])&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-AC_CONFIG_SUBDIRS([../asn1])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AC_CONFIG_SUBDIRS([../util ../asn1])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;
-&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;
+&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_MAINTAINER_MODE
+&lt;span class="w"&gt; &lt;/span&gt;AM_MAINTAINER_MODE&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gh"&gt;diff --git a/daemons/configure.ac b/daemons/configure.ac&lt;/span&gt;
-&lt;span class="gh"&gt;index 2906def..f27312f 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/daemons/configure.ac&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/daemons/configure.ac&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -5,9 +5,9 @@ AC_INIT([ipa-server],&lt;/span&gt;
-         [https://hosted.fedoraproject.org/projects/freeipa/newticket])
+&lt;span class="gh"&gt;diff --git a/daemons/configure.ac b/daemons/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 2906def..f27312f 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/daemons/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/daemons/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -5,9 +5,9 @@ AC_INIT([ipa-server],&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;        [https://hosted.fedoraproject.org/projects/freeipa/newticket])&lt;span class="w"&gt;&lt;/span&gt;
 
- AC_CONFIG_HEADERS([config.h])
-&lt;span class="gd"&gt;-AC_CONFIG_SUBDIRS([../asn1])&lt;/span&gt;
-&lt;span class="gi"&gt;+AC_CONFIG_SUBDIRS([../util ../asn1])&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_HEADERS([config.h])&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-AC_CONFIG_SUBDIRS([../asn1])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AC_CONFIG_SUBDIRS([../util ../asn1])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;
-&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;
- m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
+&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_MAINTAINER_MODE
-&lt;span class="gh"&gt;diff --git a/daemons/ipa-kdb/Makefile.am b/daemons/ipa-kdb/Makefile.am&lt;/span&gt;
-&lt;span class="gh"&gt;index a4ea366..2f8bcfb 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/daemons/ipa-kdb/Makefile.am&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/daemons/ipa-kdb/Makefile.am&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -2,8 +2,8 @@ NULL =&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AM_MAINTAINER_MODE&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/daemons/ipa-kdb/Makefile.am b/daemons/ipa-kdb/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index a4ea366..2f8bcfb 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/daemons/ipa-kdb/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/daemons/ipa-kdb/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -2,8 +2,8 @@ NULL =&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- KRB5_UTIL_DIR = ../../util
- IPA_UTIL_DIR = ../../../util
-&lt;span class="gd"&gt;-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \&lt;/span&gt;
-&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd.c&lt;/span&gt;
-&lt;span class="gi"&gt;+KRB5_UTIL_LIBS = ../../util/ipa_krb5.la \&lt;/span&gt;
-&lt;span class="gi"&gt;+        ../../util/ipa_pwd.la&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;KRB5_UTIL_DIR = ../../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;IPA_UTIL_DIR = ../../../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+KRB5_UTIL_LIBS = ../../util/ipa_krb5.la \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+        ../../util/ipa_pwd.la&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_CPPFLAGS =                      \
-    -I.                     \
-&lt;span class="gu"&gt;@@ -39,7 +39,6 @@ ipadb_la_SOURCES =        \&lt;/span&gt;
-    ipa_kdb_mspac.c     \
-    ipa_kdb_delegation.c    \
-    ipa_kdb_audit_as.c  \
-&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)   \&lt;/span&gt;
-    $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;AM_CPPFLAGS =                      \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   -I.                     \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -39,7 +39,6 @@ ipadb_la_SOURCES =        \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   ipa_kdb_mspac.c     \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   ipa_kdb_delegation.c    \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   ipa_kdb_audit_as.c  \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)   \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- ipadb_la_LDFLAGS =         \
-&lt;span class="gu"&gt;@@ -53,6 +52,7 @@ ipadb_la_LIBADD =         \&lt;/span&gt;
-    $(NDRPAC_LIBS)      \
-    $(UNISTRING_LIBS)   \
-    $(NSS_LIBS)             \
-&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)   \&lt;/span&gt;
-    $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;ipadb_la_LDFLAGS =         \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -53,6 +52,7 @@ ipadb_la_LIBADD =         \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NDRPAC_LIBS)      \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(UNISTRING_LIBS)   \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NSS_LIBS)             \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)   \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- if HAVE_CMOCKA
-&lt;span class="gu"&gt;@@ -71,7 +71,6 @@ ipa_kdb_tests_SOURCES =        \&lt;/span&gt;
-        ipa_kdb_mspac.c         \
-        ipa_kdb_delegation.c    \
-        ipa_kdb_audit_as.c      \
-&lt;span class="gd"&gt;-       $(KRB5_UTIL_SRCS)       \&lt;/span&gt;
-        $(NULL)
- ipa_kdb_tests_CFLAGS = $(CMOCKA_CFLAGS)
- ipa_kdb_tests_LDADD =          \
-&lt;span class="gu"&gt;@@ -81,6 +80,7 @@ ipa_kdb_tests_LDADD =          \&lt;/span&gt;
-        $(NDRPAC_LIBS)          \
-        $(UNISTRING_LIBS)       \
-        $(NSS_LIBS)             \
-&lt;span class="gi"&gt;+       $(KRB5_UTIL_LIBS)       \&lt;/span&gt;
-        -lkdb5                  \
-        -lsss_idmap             \
-        $(NULL)
-&lt;span class="gh"&gt;diff --git a/daemons/ipa-sam/Makefile.am b/daemons/ipa-sam/Makefile.am&lt;/span&gt;
-&lt;span class="gh"&gt;index ea14661..17d77aa 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/daemons/ipa-sam/Makefile.am&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/daemons/ipa-sam/Makefile.am&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -7,7 +7,7 @@ SAMBA40EXTRA_LIBS = $(SAMBA40EXTRA_LIBPATH) \&lt;/span&gt;
-            $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;if HAVE_CMOCKA&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -71,7 +71,6 @@ ipa_kdb_tests_SOURCES =        \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       ipa_kdb_mspac.c         \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       ipa_kdb_delegation.c    \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       ipa_kdb_audit_as.c      \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-       $(KRB5_UTIL_SRCS)       \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ipa_kdb_tests_CFLAGS = $(CMOCKA_CFLAGS)&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ipa_kdb_tests_LDADD =          \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -81,6 +80,7 @@ ipa_kdb_tests_LDADD =          \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       $(NDRPAC_LIBS)          \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       $(UNISTRING_LIBS)       \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       $(NSS_LIBS)             \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+       $(KRB5_UTIL_LIBS)       \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       -lkdb5                  \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       -lsss_idmap             \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/daemons/ipa-sam/Makefile.am b/daemons/ipa-sam/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index ea14661..17d77aa 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/daemons/ipa-sam/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/daemons/ipa-sam/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -7,7 +7,7 @@ SAMBA40EXTRA_LIBS = $(SAMBA40EXTRA_LIBPATH) \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;           $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- KRB5_UTIL_DIR=../../util
-&lt;span class="gd"&gt;-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c&lt;/span&gt;
-&lt;span class="gi"&gt;+KRB5_UTIL_LIBS=../../util/ipa_krb5.la ../../util/ipa_pwd_ntlm.la&lt;/span&gt;
- ASN1_UTIL_DIR=../../asn1
+&lt;span class="w"&gt; &lt;/span&gt;KRB5_UTIL_DIR=../../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+KRB5_UTIL_LIBS=../../util/ipa_krb5.la ../../util/ipa_pwd_ntlm.la&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ASN1_UTIL_DIR=../../asn1&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_CPPFLAGS =                      \
-&lt;span class="gu"&gt;@@ -39,7 +39,6 @@ plugin_LTLIBRARIES =      \&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AM_CPPFLAGS =                      \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -39,7 +39,6 @@ plugin_LTLIBRARIES =      \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- ipasam_la_SOURCES =        \
-    ipa_sam.c       \
-&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)   \&lt;/span&gt;
-    $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;ipasam_la_SOURCES =        \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   ipa_sam.c       \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)   \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- ipasam_la_LDFLAGS =        \
-&lt;span class="gu"&gt;@@ -57,6 +56,7 @@ ipasam_la_LIBADD =        \&lt;/span&gt;
-    $(SAMBA40EXTRA_LIBS)    \
-    $(SSSIDMAP_LIBS)    \
-    $(ASN1_UTIL_DIR)/libipaasn1.la  \
-&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)   \&lt;/span&gt;
-    $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;ipasam_la_LDFLAGS =        \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -57,6 +56,7 @@ ipasam_la_LIBADD =        \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(SAMBA40EXTRA_LIBS)    \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(SSSIDMAP_LIBS)    \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(ASN1_UTIL_DIR)/libipaasn1.la  \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)   \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- EXTRA_DIST =           \
-&lt;span class="gh"&gt;diff --git a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;
-&lt;span class="gh"&gt;index 46a6491..50c9c66 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -3,9 +3,9 @@ NULL =&lt;/span&gt;
- MAINTAINERCLEANFILES = *~ Makefile.in
- PLUGIN_COMMON_DIR = ../common
- KRB5_UTIL_DIR = ../../../util
-&lt;span class="gd"&gt;-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \&lt;/span&gt;
-&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd.c \&lt;/span&gt;
-&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c&lt;/span&gt;
-&lt;span class="gi"&gt;+KRB5_UTIL_LIBS = ../../../util/ipa_krb5.la \&lt;/span&gt;
-&lt;span class="gi"&gt;+        ../../../util/ipa_pwd.la \&lt;/span&gt;
-&lt;span class="gi"&gt;+        ../../../util/ipa_pwd_ntlm.la&lt;/span&gt;
- ASN1_UTIL_DIR=../../../asn1
+&lt;span class="w"&gt; &lt;/span&gt;EXTRA_DIST =           \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 46a6491..50c9c66 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -3,9 +3,9 @@ NULL =&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;MAINTAINERCLEANFILES = *~ Makefile.in&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;PLUGIN_COMMON_DIR = ../common&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;KRB5_UTIL_DIR = ../../../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd.c \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+KRB5_UTIL_LIBS = ../../../util/ipa_krb5.la \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+        ../../../util/ipa_pwd.la \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+        ../../../util/ipa_pwd_ntlm.la&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ASN1_UTIL_DIR=../../../asn1&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_CPPFLAGS =                          \
-&lt;span class="gu"&gt;@@ -41,6 +41,7 @@ plugin_LTLIBRARIES = libipa_pwd_extop.la&lt;/span&gt;
- libipa_pwd_extop_la_LIBADD  = \
-    $(builddir)/../libotp/libotp.la \
-    $(ASN1_UTIL_DIR)/libipaasn1.la  \
-&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)       \&lt;/span&gt;
-    $(NULL)
- libipa_pwd_extop_la_SOURCES =      \
-    common.c            \
-&lt;span class="gu"&gt;@@ -48,7 +49,6 @@ libipa_pwd_extop_la_SOURCES =         \&lt;/span&gt;
-    prepost.c           \
-    ipa_pwd_extop.c         \
-    otpctrl.c           \
-&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)       \&lt;/span&gt;
-    $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;AM_CPPFLAGS =                          \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -41,6 +41,7 @@ plugin_LTLIBRARIES = libipa_pwd_extop.la&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;libipa_pwd_extop_la_LIBADD  = \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(builddir)/../libotp/libotp.la \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(ASN1_UTIL_DIR)/libipaasn1.la  \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)       \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;libipa_pwd_extop_la_SOURCES =      \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   common.c            \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -48,7 +49,6 @@ libipa_pwd_extop_la_SOURCES =         \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   prepost.c           \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   ipa_pwd_extop.c         \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   otpctrl.c           \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)       \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- appdir = $(IPA_DATA_DIR)
-&lt;span class="gh"&gt;diff --git a/util/Makefile.am b/util/Makefile.am&lt;/span&gt;
-new file mode 100644
-&lt;span class="gh"&gt;index 0000000..a848a7c&lt;/span&gt;
-&lt;span class="gd"&gt;--- /dev/null&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/util/Makefile.am&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -0,0 +1,8 @@&lt;/span&gt;
-&lt;span class="gi"&gt;+#AM_CPPFLAGS = -I../util -Iasn1c&lt;/span&gt;
-&lt;span class="gi"&gt;+&lt;/span&gt;
-&lt;span class="gi"&gt;+noinst_LTLIBRARIES=libipa_krb5.la libipa_pwd.la libipa_pwd_ntlm.la&lt;/span&gt;
-&lt;span class="gi"&gt;+noinst_HEADERS=ipa_krb5.h ipa_mspac.h ipa_pwd.h&lt;/span&gt;
-&lt;span class="gi"&gt;+&lt;/span&gt;
-&lt;span class="gi"&gt;+libipa_krb5_la_SOURCES=ipa_krb5.c&lt;/span&gt;
-&lt;span class="gi"&gt;+libipa_pwd_la_SOURCES=ipa_pwd.c&lt;/span&gt;
-&lt;span class="gi"&gt;+libipa_pwd_ntlm_la_SOURCES=ipa_pwd_ntlm.c&lt;/span&gt;
-&lt;span class="gh"&gt;diff --git a/util/configure.ac b/util/configure.ac&lt;/span&gt;
-new file mode 100644
-&lt;span class="gh"&gt;index 0000000..2b323c1&lt;/span&gt;
-&lt;span class="gd"&gt;--- /dev/null&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/util/configure.ac&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -0,0 +1,23 @@&lt;/span&gt;
-&lt;span class="gi"&gt;+AC_PREREQ(2.59)&lt;/span&gt;
-&lt;span class="gi"&gt;+m4_include(../version.m4)&lt;/span&gt;
-&lt;span class="gi"&gt;+AC_INIT([ipa-server],&lt;/span&gt;
-&lt;span class="gi"&gt;+        IPA_VERSION,&lt;/span&gt;
-&lt;span class="gi"&gt;+        [https://hosted.fedoraproject.org/projects/freeipa/newticket])&lt;/span&gt;
-&lt;span class="gi"&gt;+&lt;/span&gt;
-&lt;span class="gi"&gt;+AC_CONFIG_HEADERS([config.h])&lt;/span&gt;
-&lt;span class="gi"&gt;+AC_PROG_CC_C99&lt;/span&gt;
-&lt;span class="gi"&gt;+LT_INIT&lt;/span&gt;
-&lt;span class="gi"&gt;+&lt;/span&gt;
-&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;
-&lt;span class="gi"&gt;+&lt;/span&gt;
-&lt;span class="gi"&gt;+AM_MAINTAINER_MODE&lt;/span&gt;
-&lt;span class="gi"&gt;+&lt;/span&gt;
-&lt;span class="gi"&gt;+AC_SUBST(VERSION)&lt;/span&gt;
-&lt;span class="gi"&gt;+&lt;/span&gt;
-&lt;span class="gi"&gt;+# Files&lt;/span&gt;
-&lt;span class="gi"&gt;+&lt;/span&gt;
-&lt;span class="gi"&gt;+AC_CONFIG_FILES([&lt;/span&gt;
-&lt;span class="gi"&gt;+    Makefile&lt;/span&gt;
-&lt;span class="gi"&gt;+])&lt;/span&gt;
-&lt;span class="gi"&gt;+&lt;/span&gt;
-&lt;span class="gi"&gt;+AC_OUTPUT&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;span class="w"&gt; &lt;/span&gt;appdir = $(IPA_DATA_DIR)&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/util/Makefile.am b/util/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;new file mode 100644&lt;/span&gt;
+&lt;span class="gh"&gt;index 0000000..a848a7c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- /dev/null&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/util/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -0,0 +1,8 @@&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+#AM_CPPFLAGS = -I../util -Iasn1c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+noinst_LTLIBRARIES=libipa_krb5.la libipa_pwd.la libipa_pwd_ntlm.la&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+noinst_HEADERS=ipa_krb5.h ipa_mspac.h ipa_pwd.h&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+libipa_krb5_la_SOURCES=ipa_krb5.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+libipa_pwd_la_SOURCES=ipa_pwd.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+libipa_pwd_ntlm_la_SOURCES=ipa_pwd_ntlm.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/util/configure.ac b/util/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;new file mode 100644&lt;/span&gt;
+&lt;span class="gh"&gt;index 0000000..2b323c1&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- /dev/null&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/util/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -0,0 +1,23 @@&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AC_PREREQ(2.59)&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+m4_include(../version.m4)&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AC_INIT([ipa-server],&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+        IPA_VERSION,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+        [https://hosted.fedoraproject.org/projects/freeipa/newticket])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AC_CONFIG_HEADERS([config.h])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AC_PROG_CC_C99&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+LT_INIT&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AM_MAINTAINER_MODE&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AC_SUBST(VERSION)&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+# Files&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AC_CONFIG_FILES([&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+    Makefile&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AC_OUTPUT&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;But being its own project means that the utils directory is now responsible for
 handling its own dependencies, which was previously done by the &lt;code&gt;configure.ac&lt;/code&gt;
 files in the &lt;code&gt;client&lt;/code&gt; and &lt;code&gt;daemons&lt;/code&gt; directories. So with the simple
 &lt;code&gt;utils/configure.ac&lt;/code&gt; file introduced by this patch, the build fails due to
 missing dependencies:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;In file included from ipa_pwd_ntlm.c:30:0:
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;In file included from ipa_pwd_ntlm.c:30:0:
 /usr/include/dirsrv/slapi-plugin.h:30:21: fatal error: prtypes.h: No such file or directory
 compilation terminated.
 Makefile:427: recipe for target &amp;#39;ipa_pwd_ntlm.lo&amp;#39; failed
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;We might be able to make this work by copying the necessary dependencies into
 the new configure.ac file. However, adding the maintenance burden of another
@@ -1065,238 +1033,234 @@ the work that's already being done by the existing configure scripts.&lt;/p&gt;
 &lt;code&gt;utils&lt;/code&gt; its own configure script, what if we just make the packages that need
 it responsible for generating its Makefile themselves? The following patch does
 this:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gh"&gt;diff --git a/Makefile b/Makefile&lt;/span&gt;
-&lt;span class="gh"&gt;index 210b7ac..6e00220 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/Makefile&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/Makefile&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -3,7 +3,7 @@&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gh"&gt;diff --git a/Makefile b/Makefile&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 210b7ac..6e00220 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/Makefile&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/Makefile&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -3,7 +3,7 @@&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- include VERSION
+&lt;span class="w"&gt; &lt;/span&gt;include VERSION&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gd"&gt;-SUBDIRS=asn1 daemons install ipapython ipalib&lt;/span&gt;
-&lt;span class="gi"&gt;+SUBDIRS=util asn1 daemons install ipapython ipalib&lt;/span&gt;
- CLIENTDIRS=ipapython ipalib client asn1
- CLIENTPYDIRS=ipaclient ipaplatform
+&lt;span class="gd"&gt;-SUBDIRS=asn1 daemons install ipapython ipalib&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+SUBDIRS=util asn1 daemons install ipapython ipalib&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;CLIENTDIRS=ipapython ipalib client asn1&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;CLIENTPYDIRS=ipaclient ipaplatform&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gh"&gt;diff --git a/client/Makefile.am b/client/Makefile.am&lt;/span&gt;
-&lt;span class="gh"&gt;index 3d135a3..afc2977 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/client/Makefile.am&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/client/Makefile.am&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -13,7 +13,7 @@ endif&lt;/span&gt;
- export AM_CFLAGS
+&lt;span class="gh"&gt;diff --git a/client/Makefile.am b/client/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 3d135a3..afc2977 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/client/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/client/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -13,7 +13,7 @@ endif&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;export AM_CFLAGS&lt;span class="w"&gt;&lt;/span&gt;
 
- KRB5_UTIL_DIR=../util
-&lt;span class="gd"&gt;-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c&lt;/span&gt;
-&lt;span class="gi"&gt;+KRB5_UTIL_LIBS=../util/ipa_krb5.la&lt;/span&gt;
- ASN1_UTIL_DIR=../asn1
- IPA_CONF_FILE=$(sysconfdir)/ipa/default.conf
+&lt;span class="w"&gt; &lt;/span&gt;KRB5_UTIL_DIR=../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+KRB5_UTIL_LIBS=../util/ipa_krb5.la&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ASN1_UTIL_DIR=../asn1&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;IPA_CONF_FILE=$(sysconfdir)/ipa/default.conf&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gu"&gt;@@ -52,7 +52,6 @@ sbin_SCRIPTS =            \&lt;/span&gt;
- ipa_getkeytab_SOURCES =        \
-    ipa-getkeytab.c     \
-    ipa-client-common.c \
-&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)   \&lt;/span&gt;
-    $(NULL)
+&lt;span class="gu"&gt;@@ -52,7 +52,6 @@ sbin_SCRIPTS =            \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ipa_getkeytab_SOURCES =        \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   ipa-getkeytab.c     \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   ipa-client-common.c \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)   \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- ipa_getkeytab_LDADD =      \
-&lt;span class="gu"&gt;@@ -63,6 +62,7 @@ ipa_getkeytab_LDADD =         \&lt;/span&gt;
-    $(POPT_LIBS)        \
-    $(LIBINTL_LIBS)         \
-    $(INI_LIBS)     \
-&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)   \&lt;/span&gt;
-    $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;ipa_getkeytab_LDADD =      \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -63,6 +62,7 @@ ipa_getkeytab_LDADD =         \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(POPT_LIBS)        \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(LIBINTL_LIBS)         \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(INI_LIBS)     \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)   \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- ipa_rmkeytab_SOURCES =     \
-&lt;span class="gh"&gt;diff --git a/client/configure.ac b/client/configure.ac&lt;/span&gt;
-&lt;span class="gh"&gt;index 58f23af..4ca9caf 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/client/configure.ac&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/client/configure.ac&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -8,7 +8,7 @@ LT_INIT&lt;/span&gt;
- AC_CONFIG_HEADERS([config.h])
- AC_CONFIG_SUBDIRS([../asn1])
+&lt;span class="w"&gt; &lt;/span&gt;ipa_rmkeytab_SOURCES =     \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/client/configure.ac b/client/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 58f23af..4ca9caf 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/client/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/client/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -8,7 +8,7 @@ LT_INIT&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_HEADERS([config.h])&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_SUBDIRS([../asn1])&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;
-&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;
+&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_MAINTAINER_MODE
+&lt;span class="w"&gt; &lt;/span&gt;AM_MAINTAINER_MODE&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gu"&gt;@@ -220,6 +220,7 @@ dnl ---------------------------------------------------------------------------&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -220,6 +220,7 @@ dnl ---------------------------------------------------------------------------&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- AC_CONFIG_FILES([
-     Makefile
-&lt;span class="gi"&gt;+    ../util/Makefile&lt;/span&gt;
-     ../asn1/Makefile
-     man/Makefile
- ])
-&lt;span class="gh"&gt;diff --git a/daemons/configure.ac b/daemons/configure.ac&lt;/span&gt;
-&lt;span class="gh"&gt;index 2906def..761c15c 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/daemons/configure.ac&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/daemons/configure.ac&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -7,7 +7,7 @@ AC_INIT([ipa-server],&lt;/span&gt;
- AC_CONFIG_HEADERS([config.h])
- AC_CONFIG_SUBDIRS([../asn1])
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_FILES([&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;    Makefile&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+    ../util/Makefile&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;    ../asn1/Makefile&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;    man/Makefile&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;])&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/daemons/configure.ac b/daemons/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 2906def..761c15c 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/daemons/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/daemons/configure.ac&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -7,7 +7,7 @@ AC_INIT([ipa-server],&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_HEADERS([config.h])&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_SUBDIRS([../asn1])&lt;span class="w"&gt;&lt;/span&gt;
 
-&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;
-&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;
- m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
+&lt;span class="gd"&gt;-AM_INIT_AUTOMAKE([foreign])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+AM_INIT_AUTOMAKE([foreign subdir-objects])&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_MAINTAINER_MODE
-&lt;span class="gu"&gt;@@ -332,6 +332,7 @@ AC_SUBST(LDFLAGS)&lt;/span&gt;
- AC_CONFIG_FILES([
-     Makefile
-     ../asn1/Makefile
-&lt;span class="gi"&gt;+    ../util/Makefile&lt;/span&gt;
-     ipa-kdb/Makefile
-     ipa-sam/Makefile
-     ipa-otpd/Makefile
-&lt;span class="gh"&gt;diff --git a/daemons/ipa-kdb/Makefile.am b/daemons/ipa-kdb/Makefile.am&lt;/span&gt;
-&lt;span class="gh"&gt;index a4ea366..2f8bcfb 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/daemons/ipa-kdb/Makefile.am&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/daemons/ipa-kdb/Makefile.am&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -2,8 +2,8 @@ NULL =&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AM_MAINTAINER_MODE&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -332,6 +332,7 @@ AC_SUBST(LDFLAGS)&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AC_CONFIG_FILES([&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;    Makefile&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;    ../asn1/Makefile&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+    ../util/Makefile&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;    ipa-kdb/Makefile&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;    ipa-sam/Makefile&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;    ipa-otpd/Makefile&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/daemons/ipa-kdb/Makefile.am b/daemons/ipa-kdb/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index a4ea366..2f8bcfb 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/daemons/ipa-kdb/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/daemons/ipa-kdb/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -2,8 +2,8 @@ NULL =&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- KRB5_UTIL_DIR = ../../util
- IPA_UTIL_DIR = ../../../util
-&lt;span class="gd"&gt;-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \&lt;/span&gt;
-&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd.c&lt;/span&gt;
-&lt;span class="gi"&gt;+KRB5_UTIL_LIBS = ../../util/ipa_krb5.la \&lt;/span&gt;
-&lt;span class="gi"&gt;+        ../../util/ipa_pwd.la&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;KRB5_UTIL_DIR = ../../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;IPA_UTIL_DIR = ../../../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+KRB5_UTIL_LIBS = ../../util/ipa_krb5.la \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+        ../../util/ipa_pwd.la&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_CPPFLAGS =                      \
-    -I.                     \
-&lt;span class="gu"&gt;@@ -39,7 +39,6 @@ ipadb_la_SOURCES =        \&lt;/span&gt;
-    ipa_kdb_mspac.c     \
-    ipa_kdb_delegation.c    \
-    ipa_kdb_audit_as.c  \
-&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)   \&lt;/span&gt;
-    $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;AM_CPPFLAGS =                      \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   -I.                     \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -39,7 +39,6 @@ ipadb_la_SOURCES =        \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   ipa_kdb_mspac.c     \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   ipa_kdb_delegation.c    \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   ipa_kdb_audit_as.c  \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)   \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- ipadb_la_LDFLAGS =         \
-&lt;span class="gu"&gt;@@ -53,6 +52,7 @@ ipadb_la_LIBADD =         \&lt;/span&gt;
-    $(NDRPAC_LIBS)      \
-    $(UNISTRING_LIBS)   \
-    $(NSS_LIBS)             \
-&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)   \&lt;/span&gt;
-    $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;ipadb_la_LDFLAGS =         \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -53,6 +52,7 @@ ipadb_la_LIBADD =         \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NDRPAC_LIBS)      \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(UNISTRING_LIBS)   \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NSS_LIBS)             \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)   \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- if HAVE_CMOCKA
-&lt;span class="gu"&gt;@@ -71,7 +71,6 @@ ipa_kdb_tests_SOURCES =        \&lt;/span&gt;
-        ipa_kdb_mspac.c         \
-        ipa_kdb_delegation.c    \
-        ipa_kdb_audit_as.c      \
-&lt;span class="gd"&gt;-       $(KRB5_UTIL_SRCS)       \&lt;/span&gt;
-        $(NULL)
- ipa_kdb_tests_CFLAGS = $(CMOCKA_CFLAGS)
- ipa_kdb_tests_LDADD =          \
-&lt;span class="gu"&gt;@@ -81,6 +80,7 @@ ipa_kdb_tests_LDADD =          \&lt;/span&gt;
-        $(NDRPAC_LIBS)          \
-        $(UNISTRING_LIBS)       \
-        $(NSS_LIBS)             \
-&lt;span class="gi"&gt;+       $(KRB5_UTIL_LIBS)       \&lt;/span&gt;
-        -lkdb5                  \
-        -lsss_idmap             \
-        $(NULL)
-&lt;span class="gh"&gt;diff --git a/daemons/ipa-sam/Makefile.am b/daemons/ipa-sam/Makefile.am&lt;/span&gt;
-&lt;span class="gh"&gt;index ea14661..17d77aa 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/daemons/ipa-sam/Makefile.am&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/daemons/ipa-sam/Makefile.am&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -7,7 +7,7 @@ SAMBA40EXTRA_LIBS = $(SAMBA40EXTRA_LIBPATH) \&lt;/span&gt;
-            $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;if HAVE_CMOCKA&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -71,7 +71,6 @@ ipa_kdb_tests_SOURCES =        \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       ipa_kdb_mspac.c         \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       ipa_kdb_delegation.c    \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       ipa_kdb_audit_as.c      \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-       $(KRB5_UTIL_SRCS)       \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ipa_kdb_tests_CFLAGS = $(CMOCKA_CFLAGS)&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ipa_kdb_tests_LDADD =          \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -81,6 +80,7 @@ ipa_kdb_tests_LDADD =          \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       $(NDRPAC_LIBS)          \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       $(UNISTRING_LIBS)       \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       $(NSS_LIBS)             \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+       $(KRB5_UTIL_LIBS)       \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       -lkdb5                  \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       -lsss_idmap             \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;       $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/daemons/ipa-sam/Makefile.am b/daemons/ipa-sam/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index ea14661..17d77aa 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/daemons/ipa-sam/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/daemons/ipa-sam/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -7,7 +7,7 @@ SAMBA40EXTRA_LIBS = $(SAMBA40EXTRA_LIBPATH) \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;           $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- KRB5_UTIL_DIR=../../util
-&lt;span class="gd"&gt;-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c&lt;/span&gt;
-&lt;span class="gi"&gt;+KRB5_UTIL_LIBS=../../util/ipa_krb5.la ../../util/ipa_pwd_ntlm.la&lt;/span&gt;
- ASN1_UTIL_DIR=../../asn1
+&lt;span class="w"&gt; &lt;/span&gt;KRB5_UTIL_DIR=../../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+KRB5_UTIL_LIBS=../../util/ipa_krb5.la ../../util/ipa_pwd_ntlm.la&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ASN1_UTIL_DIR=../../asn1&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_CPPFLAGS =                      \
-&lt;span class="gu"&gt;@@ -39,7 +39,6 @@ plugin_LTLIBRARIES =      \&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;AM_CPPFLAGS =                      \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -39,7 +39,6 @@ plugin_LTLIBRARIES =      \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
- ipasam_la_SOURCES =        \
-    ipa_sam.c       \
-&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)   \&lt;/span&gt;
-    $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;ipasam_la_SOURCES =        \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   ipa_sam.c       \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)   \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- ipasam_la_LDFLAGS =        \
-&lt;span class="gu"&gt;@@ -57,6 +56,7 @@ ipasam_la_LIBADD =        \&lt;/span&gt;
-    $(SAMBA40EXTRA_LIBS)    \
-    $(SSSIDMAP_LIBS)    \
-    $(ASN1_UTIL_DIR)/libipaasn1.la  \
-&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)   \&lt;/span&gt;
-    $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;ipasam_la_LDFLAGS =        \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -57,6 +56,7 @@ ipasam_la_LIBADD =        \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(SAMBA40EXTRA_LIBS)    \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(SSSIDMAP_LIBS)    \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(ASN1_UTIL_DIR)/libipaasn1.la  \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)   \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- EXTRA_DIST =           \
-&lt;span class="gh"&gt;diff --git a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;
-&lt;span class="gh"&gt;index 46a6491..50c9c66 100644&lt;/span&gt;
-&lt;span class="gd"&gt;--- a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -3,9 +3,9 @@ NULL =&lt;/span&gt;
- MAINTAINERCLEANFILES = *~ Makefile.in
- PLUGIN_COMMON_DIR = ../common
- KRB5_UTIL_DIR = ../../../util
-&lt;span class="gd"&gt;-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \&lt;/span&gt;
-&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd.c \&lt;/span&gt;
-&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c&lt;/span&gt;
-&lt;span class="gi"&gt;+KRB5_UTIL_LIBS = ../../../util/ipa_krb5.la \&lt;/span&gt;
-&lt;span class="gi"&gt;+        ../../../util/ipa_pwd.la \&lt;/span&gt;
-&lt;span class="gi"&gt;+        ../../../util/ipa_pwd_ntlm.la&lt;/span&gt;
- ASN1_UTIL_DIR=../../../asn1
+&lt;span class="w"&gt; &lt;/span&gt;EXTRA_DIST =           \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;index 46a6491..50c9c66 100644&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -3,9 +3,9 @@ NULL =&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;MAINTAINERCLEANFILES = *~ Makefile.in&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;PLUGIN_COMMON_DIR = ../common&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;KRB5_UTIL_DIR = ../../../util&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd.c \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-        $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+KRB5_UTIL_LIBS = ../../../util/ipa_krb5.la \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+        ../../../util/ipa_pwd.la \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+        ../../../util/ipa_pwd_ntlm.la&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;ASN1_UTIL_DIR=../../../asn1&lt;span class="w"&gt;&lt;/span&gt;
 
- AM_CPPFLAGS =                          \
-&lt;span class="gu"&gt;@@ -41,6 +41,7 @@ plugin_LTLIBRARIES = libipa_pwd_extop.la&lt;/span&gt;
- libipa_pwd_extop_la_LIBADD  = \
-    $(builddir)/../libotp/libotp.la \
-    $(ASN1_UTIL_DIR)/libipaasn1.la  \
-&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)       \&lt;/span&gt;
-    $(NULL)
- libipa_pwd_extop_la_SOURCES =      \
-    common.c            \
-&lt;span class="gu"&gt;@@ -48,7 +49,6 @@ libipa_pwd_extop_la_SOURCES =         \&lt;/span&gt;
-    prepost.c           \
-    ipa_pwd_extop.c         \
-    otpctrl.c           \
-&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)       \&lt;/span&gt;
-    $(NULL)
+&lt;span class="w"&gt; &lt;/span&gt;AM_CPPFLAGS =                          \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -41,6 +41,7 @@ plugin_LTLIBRARIES = libipa_pwd_extop.la&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;libipa_pwd_extop_la_LIBADD  = \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(builddir)/../libotp/libotp.la \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(ASN1_UTIL_DIR)/libipaasn1.la  \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+   $(KRB5_UTIL_LIBS)       \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;libipa_pwd_extop_la_SOURCES =      \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   common.c            \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -48,7 +49,6 @@ libipa_pwd_extop_la_SOURCES =         \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   prepost.c           \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   ipa_pwd_extop.c         \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   otpctrl.c           \&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;-   $(KRB5_UTIL_SRCS)       \&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;   $(NULL)&lt;span class="w"&gt;&lt;/span&gt;
 
- appdir = $(IPA_DATA_DIR)
-&lt;span class="gh"&gt;diff --git a/util/Makefile.am b/util/Makefile.am&lt;/span&gt;
-new file mode 100644
-&lt;span class="gh"&gt;index 0000000..a848a7c&lt;/span&gt;
-&lt;span class="gd"&gt;--- /dev/null&lt;/span&gt;
-&lt;span class="gi"&gt;+++ b/util/Makefile.am&lt;/span&gt;
-&lt;span class="gu"&gt;@@ -0,0 +1,8 @@&lt;/span&gt;
-&lt;span class="gi"&gt;+#AM_CPPFLAGS = -I../util -Iasn1c&lt;/span&gt;
-&lt;span class="gi"&gt;+&lt;/span&gt;
-&lt;span class="gi"&gt;+noinst_LTLIBRARIES=libipa_krb5.la libipa_pwd.la libipa_pwd_ntlm.la&lt;/span&gt;
-&lt;span class="gi"&gt;+noinst_HEADERS=ipa_krb5.h ipa_mspac.h ipa_pwd.h&lt;/span&gt;
-&lt;span class="gi"&gt;+&lt;/span&gt;
-&lt;span class="gi"&gt;+libipa_krb5_la_SOURCES=ipa_krb5.c&lt;/span&gt;
-&lt;span class="gi"&gt;+libipa_pwd_la_SOURCES=ipa_pwd.c&lt;/span&gt;
-&lt;span class="gi"&gt;+libipa_pwd_ntlm_la_SOURCES=ipa_pwd_ntlm.c&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;span class="w"&gt; &lt;/span&gt;appdir = $(IPA_DATA_DIR)&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gh"&gt;diff --git a/util/Makefile.am b/util/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;new file mode 100644&lt;/span&gt;
+&lt;span class="gh"&gt;index 0000000..a848a7c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gd"&gt;--- /dev/null&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+++ b/util/Makefile.am&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gu"&gt;@@ -0,0 +1,8 @@&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+#AM_CPPFLAGS = -I../util -Iasn1c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+noinst_LTLIBRARIES=libipa_krb5.la libipa_pwd.la libipa_pwd_ntlm.la&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+noinst_HEADERS=ipa_krb5.h ipa_mspac.h ipa_pwd.h&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+libipa_krb5_la_SOURCES=ipa_krb5.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+libipa_pwd_la_SOURCES=ipa_pwd.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="gi"&gt;+libipa_pwd_ntlm_la_SOURCES=ipa_pwd_ntlm.c&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;But this ends badly too:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;make[2]: Entering directory &amp;#39;/home/blipton/src/freeipa/rpmbuild/BUILD/freeipa-4.3.90.201606132126GIT475c6bc/util&amp;#39;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;make[2]: Entering directory &amp;#39;/home/blipton/src/freeipa/rpmbuild/BUILD/freeipa-4.3.90.201606132126GIT475c6bc/util&amp;#39;
 cd ../.. &amp;amp;&amp;amp; make  am--refresh
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Notice that make is trying to change to a directory outside of the build
 directory. No surprise that it doesn't find a Makefile there. What's going on?&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;cd&lt;/code&gt; is triggered by one of several makefile lines that run&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;top_builddir&lt;span class="k"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;MAKE&lt;span class="k"&gt;)&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;AM_MAKEFLAGS&lt;span class="k"&gt;)&lt;/span&gt; am--refresh
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;top_builddir&lt;span class="k"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;MAKE&lt;span class="k"&gt;)&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;AM_MAKEFLAGS&lt;span class="k"&gt;)&lt;/span&gt; am--refresh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;and in the same Makefile, &lt;code&gt;top_builddir&lt;/code&gt; is defined to be &lt;code&gt;../..&lt;/code&gt;. Since this
 build is actually taking place in the &lt;code&gt;client&lt;/code&gt; subdirectory, the correct
 relative path would be &lt;code&gt;../client&lt;/code&gt;. But if we look at the code in
 config.status, we see:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;ac_dir_suffix&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/&lt;span class="sb"&gt;`&lt;/span&gt;&lt;span class="nv"&gt;$as_echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$ac_dir&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; sed &lt;span class="s1"&gt;&amp;#39;s|^\.[\\/]||&amp;#39;&lt;/span&gt;&lt;span class="sb"&gt;`&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;ac_dir_suffix&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/&lt;span class="sb"&gt;`&lt;/span&gt;&lt;span class="nv"&gt;$as_echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$ac_dir&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; sed &lt;span class="s1"&gt;&amp;#39;s|^\.[\\/]||&amp;#39;&lt;/span&gt;&lt;span class="sb"&gt;`&lt;/span&gt;
 &lt;span class="c1"&gt;# A &amp;quot;..&amp;quot; for each directory in $ac_dir_suffix.&lt;/span&gt;
 &lt;span class="nv"&gt;ac_top_builddir_sub&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="sb"&gt;`&lt;/span&gt;&lt;span class="nv"&gt;$as_echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$ac_dir_suffix&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; sed &lt;span class="s1"&gt;&amp;#39;s|/[^\\/]*|/..|g;s|/||&amp;#39;&lt;/span&gt;&lt;span class="sb"&gt;`&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;As the comment says, this looks at the relative path from the configure script
 to the Makefile (in this case &lt;code&gt;../util/Makefile&lt;/code&gt;), and replaces each directory
@@ -1324,89 +1288,78 @@ option until automake 1.16, and not having the option won't break anything
 until automake 2.0, it may be easiest to just leave it alone for now.&lt;/p&gt;</content><category term="freeipa"></category></entry><entry><title>Manually requesting certs from Dogtag with certmonger debug tools</title><link href="http://blog.benjaminlipton.com/2016/06/12/dogtag-requests.html" rel="alternate"></link><published>2016-06-12T00:00:00-04:00</published><updated>2016-06-12T00:00:00-04:00</updated><author><name>Benjamin Lipton</name></author><id>tag:blog.benjaminlipton.com,2016-06-12:/2016/06/12/dogtag-requests.html</id><summary type="html">&lt;p&gt;This post records the results some experimentation with the Dogtag API. Specifically, we will show how to authenticate against the API using credentials that are automatically generated by FreeIPA installation, how to use debug tools distributed with certmonger to issue certificates via the API, and a method of tweaking the …&lt;/p&gt;</summary><content type="html">&lt;p&gt;This post records the results some experimentation with the Dogtag API. Specifically, we will show how to authenticate against the API using credentials that are automatically generated by FreeIPA installation, how to use debug tools distributed with certmonger to issue certificates via the API, and a method of tweaking the created cert via the API parameters passed.&lt;/p&gt;
 &lt;h2 id="acquiring-the-tool"&gt;Acquiring the tool&lt;/h2&gt;
 &lt;p&gt;We will be using the &lt;code&gt;submit-d&lt;/code&gt; tool, included in the certmonger source distribution but not the binary packages. First we download the source and build it:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ git clone git://git.fedorahosted.org/git/certmonger.git
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ git clone git://git.fedorahosted.org/git/certmonger.git
 $ &lt;span class="nb"&gt;cd&lt;/span&gt; certmonger
 $ sudo dnf install dbus-devel gettext-devel libidn-devel
 $ ./autogen.sh
 $ make
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h2 id="authentication-setup"&gt;Authentication setup&lt;/h2&gt;
 &lt;p&gt;FreeIPA uses a client certificate stored in the NSS database &lt;code&gt;/etc/httpd/alias&lt;/code&gt; to authenticate to Dogtag. Unfortunately, this database uses the older DBM format, while the tool we will be using requires the newer SQLite format. So first we must create a new database and copy the cert we need into it, via a PKCS12 file:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;mkdir /tmp/certs
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;mkdir /tmp/certs
 certutil -N -d sql:/tmp/certs
 sudo pk12util -o ipaCert.p12 -n ipaCert -d /etc/httpd/alias -k /etc/httpd/alias/pwdfile.txt
 sudo pk12util -i ipaCert.p12 -n ipaCert -d sql:/tmp/certs
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;At all password prompts, hit enter. We now have two certs in the file - &lt;code&gt;ipaCert&lt;/code&gt;, the client cert we will use for authentication, and the CA cert that signs all of the certs issued by FreeIPA:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;[admin@vm-166 certs]$ certutil -L -d sql:/tmp/certs
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;[admin@vm-166 certs]$ certutil -L -d sql:/tmp/certs
 
 Certificate Nickname                                         Trust Attributes
                                                              SSL,S/MIME,JAR/XPI
 
 ipaCert                                                      u,u,u
 DOMAIN.EXAMPLE.COM IPA CA                                    ,,
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Mark the CA cert as trusted, otherwise the client will refuse to talk to the server:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;certutil -M -t TC,, -d sql:/tmp/certs -n &lt;span class="s1"&gt;&amp;#39;DOMAIN.EXAMPLE.COM IPA CA&amp;#39;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;certutil -M -t TC,, -d sql:/tmp/certs -n &lt;span class="s1"&gt;&amp;#39;DOMAIN.EXAMPLE.COM IPA CA&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h2 id="making-requests"&gt;Making requests&lt;/h2&gt;
 &lt;p&gt;Generate a keypair and a CSR to submit to the CA. The &lt;code&gt;openssl req&lt;/code&gt; command will prompt for the certificate subject; fill it out however you like.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ openssl genrsa -out test.key
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ openssl genrsa -out test.key
 $ openssl req -new -key /tmp/certs/test.key -out /tmp/certs/test.req
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Use the &lt;code&gt;submit-d&lt;/code&gt; tool to submit the request to Dogtag. If we use the &lt;code&gt;caIPAserviceCert&lt;/code&gt; template, the request goes through immediately and we are presented with a certificate:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ src/submit-d -u https://server.example.com:8443/ca/ee/ca -U https://server.example.com:8443/ca/agent/ca &lt;span class="se"&gt;\&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ src/submit-d -u https://server.example.com:8443/ca/ee/ca -U https://server.example.com:8443/ca/agent/ca &lt;span class="se"&gt;\&lt;/span&gt;
     -vv -d /tmp/certs -C ipaCert -a -T caIPAserviceCert -s /tmp/certs/test.req
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;We can see from the output that the tool makes a POST request to the &lt;code&gt;profileSubmit&lt;/code&gt; endpoint of the server.&lt;/p&gt;
 &lt;p&gt;On the other hand, if we use a non-IPA cert such as &lt;code&gt;caServerCert&lt;/code&gt;, the tool makes the same call but the request will be deferred until approved:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ src/submit-d -u https://server.example.com:8443/ca/ee/ca -U https://server.example.com:8443/ca/agent/ca &lt;span class="se"&gt;\&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ src/submit-d -u https://server.example.com:8443/ca/ee/ca -U https://server.example.com:8443/ca/agent/ca &lt;span class="se"&gt;\&lt;/span&gt;
     -vv -d /tmp/certs -C ipaCert -a -T caServerCert -s /tmp/certs/test.req
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;In this case, a &lt;code&gt;requestId&lt;/code&gt; is provided; we will use this to approve the request:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;result = &amp;quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;lt;XMLResponse&amp;gt;&amp;lt;Status&amp;gt;2&amp;lt;/Status&amp;gt;&amp;lt;Error&amp;gt;Request Deferred - {0}&amp;lt;/Error&amp;gt;&amp;lt;RequestId&amp;gt;  31&amp;lt;/RequestId&amp;gt;&amp;lt;/XMLResponse&amp;gt;&amp;quot;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;result = &amp;quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;lt;XMLResponse&amp;gt;&amp;lt;Status&amp;gt;2&amp;lt;/Status&amp;gt;&amp;lt;Error&amp;gt;Request Deferred - {0}&amp;lt;/Error&amp;gt;&amp;lt;RequestId&amp;gt;  31&amp;lt;/RequestId&amp;gt;&amp;lt;/XMLResponse&amp;gt;&amp;quot;
 error: Request Deferred - {0}
 status: 2
 requestId: 31
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;We can approve the request with the &lt;code&gt;-A&lt;/code&gt; flag and receive the certificate:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ src/submit-d -u https://server.example.com:8443/ca/ee/ca -U https://server.example.com:8443/ca/agent/ca &lt;span class="se"&gt;\&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ src/submit-d -u https://server.example.com:8443/ca/ee/ca -U https://server.example.com:8443/ca/agent/ca &lt;span class="se"&gt;\&lt;/span&gt;
     -vv -d /tmp/certs -C ipaCert -a -T caServerCert -A &lt;span class="m"&gt;31&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h2 id="tweaking-certificate-parameters"&gt;Tweaking certificate parameters&lt;/h2&gt;
 &lt;p&gt;If we look through the output of the approval command run above, we see a call to the &lt;code&gt;profileProcess&lt;/code&gt; endpoint on the Dogtag server. Interestingly, this call includes many of the parameters of the certificate:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;GET /ca/agent/ca/profileProcess?requestId=31&amp;amp;op=approve&amp;amp;xml=true&amp;amp;name=CN%3Dserver.example.com%2CO%3DDOMAIN.EXAMPLE.COM&amp;amp;notBefore=2016-06-13+02%3A50%3A46&amp;amp;notAfter=2018-06-03+02%3A50%3A46&amp;amp;authInfoAccessCritical=false&amp;amp;authInfoAccessGeneralNames=Record+%230%0AMethod%3A1.3.6.1.5.5.7.48.1%0ALocation+Type%3AURIName%0ALocation%3Ahttp%3A%2F%2Fserver.example.com%3A80%2Fca%2Focsp%0AEnable%3Atrue&amp;amp;keyUsageCritical=true&amp;amp;keyUsageDigitalSignature=true&amp;amp;keyUsageNonRepudiation=true&amp;amp;keyUsageKeyEncipherment=true&amp;amp;keyUsageDataEncipherment=true&amp;amp;keyUsageKeyAgreement=false&amp;amp;keyUsageKeyCertSign=false&amp;amp;keyUsageCrlSign=false&amp;amp;keyUsageEncipherOnly=false&amp;amp;keyUsageDecipherOnly=false&amp;amp;exKeyUsageCritical=false&amp;amp;exKeyUsageOIDs=1.3.6.1.5.5.7.3.1%2C1.3.6.1.5.5.7.3.2&amp;amp;signingAlg=SHA256withRSA HTTP/1.1
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;GET /ca/agent/ca/profileProcess?requestId=31&amp;amp;op=approve&amp;amp;xml=true&amp;amp;name=CN%3Dserver.example.com%2CO%3DDOMAIN.EXAMPLE.COM&amp;amp;notBefore=2016-06-13+02%3A50%3A46&amp;amp;notAfter=2018-06-03+02%3A50%3A46&amp;amp;authInfoAccessCritical=false&amp;amp;authInfoAccessGeneralNames=Record+%230%0AMethod%3A1.3.6.1.5.5.7.48.1%0ALocation+Type%3AURIName%0ALocation%3Ahttp%3A%2F%2Fserver.example.com%3A80%2Fca%2Focsp%0AEnable%3Atrue&amp;amp;keyUsageCritical=true&amp;amp;keyUsageDigitalSignature=true&amp;amp;keyUsageNonRepudiation=true&amp;amp;keyUsageKeyEncipherment=true&amp;amp;keyUsageDataEncipherment=true&amp;amp;keyUsageKeyAgreement=false&amp;amp;keyUsageKeyCertSign=false&amp;amp;keyUsageCrlSign=false&amp;amp;keyUsageEncipherOnly=false&amp;amp;keyUsageDecipherOnly=false&amp;amp;exKeyUsageCritical=false&amp;amp;exKeyUsageOIDs=1.3.6.1.5.5.7.3.1%2C1.3.6.1.5.5.7.3.2&amp;amp;signingAlg=SHA256withRSA HTTP/1.1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;The tool gets these parameters by parsing the output of a call to the &lt;code&gt;profileReview&lt;/code&gt; endpoint. However, we will just re-use the same values, making a small modification to the &lt;code&gt;name&lt;/code&gt; parameter.
 What happens if we submit the request again, and then approve it with the modified parameters?&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;src/submit-d -u https://server.example.com:8443/ca/ee/ca -U https://server.example.com:8443/ca/agent/ca &lt;span class="se"&gt;\&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;src/submit-d -u https://server.example.com:8443/ca/ee/ca -U https://server.example.com:8443/ca/agent/ca &lt;span class="se"&gt;\&lt;/span&gt;
     -vv -d /tmp/certs -C ipaCert -a -T caServerCert -A &lt;span class="m"&gt;32&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
     -V &lt;span class="s1"&gt;&amp;#39;name=CN%3Dnewname%2CO%3DEXAMPLE.COM&amp;amp;notBefore=2016-06-13+02%3A50%3A46&amp;amp;notAfter=2018-06-03+02%3A50%3A46&amp;amp;authInfoAccessCritical=false&amp;amp;authInfoAccessGeneralNames=Record+%230%0AMethod%3A1.3.6.1.5.5.7.48.1%0ALocation+Type%3AURIName%0ALocation%3Ahttp%3A%2F%2Fserver.example.com%3A80%2Fca%2Focsp%0AEnable%3Atrue&amp;amp;keyUsageCritical=true&amp;amp;keyUsageDigitalSignature=true&amp;amp;keyUsageNonRepudiation=true&amp;amp;keyUsageKeyEncipherment=true&amp;amp;keyUsageDataEncipherment=true&amp;amp;keyUsageKeyAgreement=false&amp;amp;keyUsageKeyCertSign=false&amp;amp;keyUsageCrlSign=false&amp;amp;keyUsageEncipherOnly=false&amp;amp;keyUsageDecipherOnly=false&amp;amp;exKeyUsageCritical=false&amp;amp;exKeyUsageOIDs=1.3.6.1.5.5.7.3.1%2C1.3.6.1.5.5.7.3.2&amp;amp;signingAlg=SHA256withRSA&amp;#39;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Our new name shows up in the certificate!&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Certificate:
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Certificate:
     Data:
         Version:  v3
         Serial Number: 0x1E
@@ -1416,4 +1369,4 @@ What happens if we submit the request again, and then approve it with the modifi
             Not Before: Monday, June 13, 2016 2:50:46 AM GMT
             Not  After: Sunday, June 3, 2018 2:50:46 AM GMT
         Subject: CN=newname,O=EXAMPLE.COM
-&lt;/pre&gt;&lt;/div&gt;</content><category term="freeipa"></category></entry></feed>
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="freeipa"></category></entry></feed>

@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <title>  Thinking about templating, part 2: Handling missing data | bl stash save
+  <title>  Thinking about templating, part 2: Handling missing data | Benjamin Lipton
 </title>
   <link rel="canonical" href="http://blog.benjaminlipton.com/2016/09/01/rule-suppression.html">
 
@@ -30,7 +30,7 @@
     <div class="container">
 <div class="row">
   <div class="col-sm-12">
-    <h1 class="title"><a href="http://blog.benjaminlipton.com/">bl stash save</a></h1>
+    <h1 class="title"><a href="http://blog.benjaminlipton.com/">Benjamin Lipton</a></h1>
   </div>
 </div>    </div>
   </header>
@@ -85,9 +85,8 @@ of config that have missing data.</p>
 <h2 id="simple-approach-data-rules-only">Simple approach: data rules only</h2>
 <p>We can pretty simply update our data rules to do this partly right, like in
 this example:</p>
-<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">subject.fqdn.0</span> <span class="cp">%}</span><span class="x">DNS = </span><span class="cp">{{</span><span class="nv">subject.fqdn.0</span><span class="cp">}}{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
-</pre></div>
-
+<div class="highlight"><pre><span></span><code><span class="cp">{%</span> <span class="k">if</span> <span class="nv">subject.fqdn.0</span> <span class="cp">%}</span><span class="x">DNS = </span><span class="cp">{{</span><span class="nv">subject.fqdn.0</span><span class="cp">}}{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
 
 <p>This adds some extra work for administrators creating new rules, and is another
 step that someone could forget, but could be manageble.</p>
@@ -101,18 +100,16 @@ may depend on for different profiles; that all depends on the data rules.</p>
 tags to compute the output of any data rules first, then render their own text
 only if some data rule rendered successfully. In its raw form, this gets ugly
 (see [1] for explanation):</p>
-<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">raw</span> <span class="cp">%}</span>{% set contents %}<span class="cp">{%</span> <span class="k">endraw</span> <span class="cp">%}{{</span> <span class="nv">datarules</span><span class="o">|</span><span class="nf">join</span><span class="o">(</span><span class="s1">&#39;\n&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><span></span><code><span class="cp">{%</span> <span class="k">raw</span> <span class="cp">%}</span>{% set contents %}<span class="cp">{%</span> <span class="k">endraw</span> <span class="cp">%}{{</span> <span class="nv">datarules</span><span class="o">|</span><span class="nf">join</span><span class="o">(</span><span class="s1">&#39;\n&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">raw</span> <span class="cp">%}</span>{% endset %}{% if contents %}<span class="cp">{%</span> <span class="k">endraw</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">subjectAltName = @</span><span class="cp">{%</span> <span class="k">call</span> <span class="nv">openssl.section</span><span class="o">()</span> <span class="cp">%}{%</span> <span class="k">raw</span> <span class="cp">%}</span>{{ contents }}
 <span class="cp">{%</span> <span class="k">endraw</span> <span class="cp">%}{%</span> <span class="k">endcall</span> <span class="cp">%}{%</span> <span class="k">raw</span> <span class="cp">%}</span>{% endif %}<span class="cp">{%</span> <span class="k">endraw</span> <span class="cp">%}</span><span class="x"></span>
-</pre></div>
-
+</code></pre></div>
 
 <p>For comparison, that rule used to look like this:</p>
-<div class="highlight"><pre><span></span><span class="x">subjectAltName = @</span><span class="cp">{%</span> <span class="k">call</span> <span class="nv">openssl.section</span><span class="o">()</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><span></span><code><span class="x">subjectAltName = @</span><span class="cp">{%</span> <span class="k">call</span> <span class="nv">openssl.section</span><span class="o">()</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">datarules</span><span class="o">|</span><span class="nf">join</span><span class="o">(</span><span class="s1">&#39;\n&#39;</span><span class="o">)</span> <span class="cp">}}{%</span> <span class="k">endcall</span> <span class="cp">%}</span><span class="x"></span>
-</pre></div>
-
+</code></pre></div>
 
 <p>I think this might be a heavy burden for administrators who want to write new
 syntax rules.</p>
@@ -145,16 +142,14 @@ with some character in between, e.g.
 finally render this template with data, what if one of our datarules renders
 while another does not due to lack of data? The above rule segment would
 produce a template like:</p>
-<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">call</span> <span class="nv">ipa.datarule</span><span class="o">()</span> <span class="cp">%}</span><span class="x">email:</span><span class="cp">{{</span><span class="nv">ipa.datafield</span><span class="o">(</span><span class="nv">subject.mail.0</span><span class="o">)|</span><span class="nf">quote</span><span class="cp">}}{%</span> <span class="k">endcall</span> <span class="cp">%}</span><span class="x">,</span><span class="cp">{%</span> <span class="k">call</span> <span class="nv">ipa.datarule</span><span class="o">()</span> <span class="cp">%}</span><span class="x">uri:</span><span class="cp">{{</span><span class="nv">ipa.datafield</span><span class="o">(</span><span class="nv">subject.inetuserhttpurl.0</span><span class="o">)|</span><span class="nf">quote</span><span class="cp">}}{%</span> <span class="k">endcall</span> <span class="cp">%}</span><span class="x"></span>
-</pre></div>
-
+<div class="highlight"><pre><span></span><code><span class="cp">{%</span> <span class="k">call</span> <span class="nv">ipa.datarule</span><span class="o">()</span> <span class="cp">%}</span><span class="x">email:</span><span class="cp">{{</span><span class="nv">ipa.datafield</span><span class="o">(</span><span class="nv">subject.mail.0</span><span class="o">)|</span><span class="nf">quote</span><span class="cp">}}{%</span> <span class="k">endcall</span> <span class="cp">%}</span><span class="x">,</span><span class="cp">{%</span> <span class="k">call</span> <span class="nv">ipa.datarule</span><span class="o">()</span> <span class="cp">%}</span><span class="x">uri:</span><span class="cp">{{</span><span class="nv">ipa.datafield</span><span class="o">(</span><span class="nv">subject.inetuserhttpurl.0</span><span class="o">)|</span><span class="nf">quote</span><span class="cp">}}{%</span> <span class="k">endcall</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
 
 <p>If this subject has no <code>inetuserhttpurl</code> field, the second <code>ipa.datarule</code> will
 be suppressed, leaving an empty string. But, the comma will still be there!
 This creates odd-looking output like the following:</p>
-<div class="highlight"><pre><span></span>--extSAN email:myuser@example.com,
-</pre></div>
-
+<div class="highlight"><pre><span></span><code>--extSAN email:myuser@example.com,
+</code></pre></div>
 
 <p>Fortunately, certutil seems not to mind these extra commas, and openssl is also
 ok with the extra blank lines that arise the same way, so this isn't breaking
@@ -182,12 +177,11 @@ dependencies of all the data rules it was configured to include, the whole
 syntax rule could be suppressed if none of those items were available.</p>
 <p>In this scheme, the template produced would look like (linebreaks and
 indentation added):</p>
-<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">subject.mail.0</span> <span class="k">or</span> <span class="nv">subject.inethttpurl.0</span> <span class="cp">%}</span><span class="x">--extSAN</span>
+<div class="highlight"><pre><span></span><code><span class="cp">{%</span> <span class="k">if</span> <span class="nv">subject.mail.0</span> <span class="k">or</span> <span class="nv">subject.inethttpurl.0</span> <span class="cp">%}</span><span class="x">--extSAN</span>
 <span class="x">  </span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">subject.mail.0</span> <span class="cp">%}</span><span class="x">email:</span><span class="cp">{{</span><span class="nv">subject.mail.0</span><span class="o">|</span><span class="nf">quote</span><span class="cp">}}{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x">,</span>
 <span class="x">  </span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">subject.inethttpurl.0</span> <span class="cp">%}</span><span class="x">uri:</span><span class="cp">{{</span><span class="nv">subject.inethttpurl.0</span><span class="o">|</span><span class="nf">quote</span><span class="cp">}}{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
-</pre></div>
-
+</code></pre></div>
 
 <p>This takes care of the third problem of the previous solution, because data
 rules with missing data will never be evaluated, meaning that superfluous
@@ -203,22 +197,20 @@ before that data is available. What we really want is to pass the <em>output</em
 all the data rules to the join filter, <em>at final render time</em>.</p>
 <p>This is not a polished solution, but an image of what this could look like is
 for the data rule to be:</p>
-<div class="highlight"><pre><span></span><span class="x">--extSAN </span><span class="cp">{{</span><span class="nv">datarules</span><span class="o">|</span><span class="nf">filternonempty</span><span class="o">(</span><span class="s2">&quot;join(&#39;,&#39;)&quot;</span><span class="o">)</span><span class="cp">}}</span><span class="x"></span>
-</pre></div>
-
+<div class="highlight"><pre><span></span><code><span class="x">--extSAN </span><span class="cp">{{</span><span class="nv">datarules</span><span class="o">|</span><span class="nf">filternonempty</span><span class="o">(</span><span class="s2">&quot;join(&#39;,&#39;)&quot;</span><span class="o">)</span><span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
 
 <p>Which would create a final template like:</p>
-<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">filternonempty</span> <span class="nv">join</span><span class="o">(</span><span class="s1">&#39;,&#39;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><span></span><code><span class="cp">{%</span> <span class="k">filternonempty</span> <span class="nv">join</span><span class="o">(</span><span class="s1">&#39;,&#39;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;data rule 1&gt;</span>
 <span class="cp">{%</span> <span class="k">filterpart</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;data rule 2&gt;</span>
 <span class="cp">{%</span> <span class="k">endfilternonempty</span> <span class="cp">%}</span><span class="x"></span>
-</pre></div>
-
+</code></pre></div>
 
 <p>And the <code>filternonempty</code> tag would be implemented so the effect of this would
 be approximately:</p>
-<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">parts</span> <span class="o">=</span> <span class="o">[]</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><span></span><code><span class="cp">{%</span> <span class="k">set</span> <span class="nv">parts</span> <span class="o">=</span> <span class="o">[]</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">set</span> <span class="nv">part</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;data rule 1&gt;</span>
 <span class="cp">{%</span> <span class="k">endset</span> <span class="cp">%}</span><span class="x"></span>
@@ -228,8 +220,7 @@ be approximately:</p>
 <span class="cp">{%</span> <span class="k">endset</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">if</span> <span class="nv">part</span> <span class="cp">%}{%</span> <span class="k">do</span> <span class="nv">parts.append</span><span class="o">(</span><span class="nv">part</span> <span class="cp">%}{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">parts</span><span class="o">|</span><span class="nf">join</span><span class="o">(</span><span class="s1">&#39;,&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-</pre></div>
-
+</code></pre></div>
 
 <p>I think this is doable, but I don't have a prototype yet.</p>
 <h2 id="conclusions">Conclusions</h2>
@@ -253,17 +244,16 @@ combination of data that's available.</p>
 <h2 id="appendix">Appendix</h2>
 <p>[1] In case you're having trouble parsing this mess, when rendered to insert
 data rules, and with whitespace added for readability, it turns into this:</p>
-<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">contents</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><span></span><code><span class="cp">{%</span> <span class="k">set</span> <span class="nv">contents</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">    </span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">subject.mail.0</span> <span class="cp">%}</span><span class="x">email = </span><span class="cp">{{</span><span class="nv">subject.mail.0</span><span class="cp">}}{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"> &lt;-- this is the data rule</span>
 <span class="cp">{%</span> <span class="k">endset</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">if</span> <span class="nv">contents</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">    subjectAltName = @</span><span class="cp">{%</span> <span class="k">call</span> <span class="nv">openssl.section</span><span class="o">()</span> <span class="cp">%}{{</span> <span class="nv">contents</span> <span class="cp">}}{%</span> <span class="k">endcall</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
-</pre></div>
-
+</code></pre></div>
 
 <p>[2]</p>
-<div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">rendersyntax</span> <span class="o">=</span> <span class="o">{}</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><span></span><code><span class="cp">{%</span> <span class="k">set</span> <span class="nv">rendersyntax</span> <span class="o">=</span> <span class="o">{}</span> <span class="cp">%}</span><span class="x"></span>
 
 <span class="cp">{%</span> <span class="k">set</span> <span class="nv">renderdata</span> <span class="o">=</span> <span class="o">{}</span> <span class="cp">%}</span><span class="x"></span>
 
@@ -305,11 +295,10 @@ data rules, and with whitespace added for readability, it turns into this:</p>
 <span class="cp">{%</span> <span class="k">do</span> <span class="nv">renderdata.update</span><span class="o">(</span><span class="nv">all</span><span class="o">=</span><span class="kp">false</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">endif</span> -<span class="cp">%}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
-</pre></div>
-
+</code></pre></div>
 
 <p>[3]</p>
-<div class="highlight"><pre><span></span><span class="c">{# List containing rendered sections to be included at end #}</span><span class="x"></span>
+<div class="highlight"><pre><span></span><code><span class="c">{# List containing rendered sections to be included at end #}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">set</span> <span class="nv">openssl_sections</span> <span class="o">=</span> <span class="o">[]</span> <span class="cp">%}</span><span class="x"></span>
 
 <span class="c">{#</span>
@@ -338,7 +327,7 @@ data rules, and with whitespace added for readability, it turns into this:</p>
 <span class="x">[ </span><span class="cp">{{</span> <span class="nv">name</span> <span class="cp">}}</span><span class="x"> ]</span>
 <span class="cp">{{</span> <span class="nv">contents</span> -<span class="cp">}}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
-</pre></div>
+</code></pre></div>
     </div>
   </article>
     </div>

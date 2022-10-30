@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <title>  FreeIPA and the 'subdir-objects' option | bl stash save
+  <title>  FreeIPA and the 'subdir-objects' option | Benjamin Lipton
 </title>
   <link rel="canonical" href="http://blog.benjaminlipton.com/2016/06/14/automake.html">
 
@@ -30,7 +30,7 @@
     <div class="container">
 <div class="row">
   <div class="col-sm-12">
-    <h1 class="title"><a href="http://blog.benjaminlipton.com/">bl stash save</a></h1>
+    <h1 class="title"><a href="http://blog.benjaminlipton.com/">Benjamin Lipton</a></h1>
   </div>
 </div>    </div>
   </header>
@@ -60,7 +60,7 @@
       <p>The subject of this blog post will be
 <a href="https://fedorahosted.org/freeipa/ticket/5873">FreeIPA Ticket #5873</a>, a request
 to fix the warning messages produced when compiling FreeIPA:</p>
-<div class="highlight"><pre><span></span>automake: warning: possible forward-incompatibility.
+<div class="highlight"><pre><span></span><code>automake: warning: possible forward-incompatibility.
 automake: At least a source file is in a subdirectory, but the &#39;subdir-objects&#39;
 automake: automake option hasn&#39;t been enabled.  For now, the corresponding output
 automake: object file(s) will be placed in the top-level directory.  However,
@@ -69,51 +69,47 @@ automake: unconditionally cause object files to be placed in the same subdirecto
 automake: of the corresponding sources.
 automake: You are advised to start using &#39;subdir-objects&#39; option throughout your
 automake: project, to avoid future incompatibilities.
-</pre></div>
-
+</code></pre></div>
 
 <h2 id="step-1-add-subdir-objects">Step 1: Add 'subdir-objects'</h2>
 <p>It says we should enable the <code>subdir-objects</code> option, so let's try it:</p>
-<div class="highlight"><pre><span></span><span class="gh">diff --git a/client/configure.ac b/client/configure.ac</span>
-<span class="gh">index 58f23af..a97edd1 100644</span>
-<span class="gd">--- a/client/configure.ac</span>
-<span class="gi">+++ b/client/configure.ac</span>
-<span class="gu">@@ -8,7 +8,7 @@ LT_INIT</span>
- AC_CONFIG_HEADERS([config.h])
- AC_CONFIG_SUBDIRS([../asn1])
+<div class="highlight"><pre><span></span><code><span class="gh">diff --git a/client/configure.ac b/client/configure.ac</span><span class="w"></span>
+<span class="gh">index 58f23af..a97edd1 100644</span><span class="w"></span>
+<span class="gd">--- a/client/configure.ac</span><span class="w"></span>
+<span class="gi">+++ b/client/configure.ac</span><span class="w"></span>
+<span class="gu">@@ -8,7 +8,7 @@ LT_INIT</span><span class="w"></span>
+<span class="w"> </span>AC_CONFIG_HEADERS([config.h])<span class="w"></span>
+<span class="w"> </span>AC_CONFIG_SUBDIRS([../asn1])<span class="w"></span>
 
-<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span>
-<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span>
+<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span><span class="w"></span>
+<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span><span class="w"></span>
 
- AM_MAINTAINER_MODE
+<span class="w"> </span>AM_MAINTAINER_MODE<span class="w"></span>
 
-<span class="gh">diff --git a/daemons/configure.ac b/daemons/configure.ac</span>
-<span class="gh">index 2906def..8dce469 100644</span>
-<span class="gd">--- a/daemons/configure.ac</span>
-<span class="gi">+++ b/daemons/configure.ac</span>
-<span class="gu">@@ -7,7 +7,7 @@ AC_INIT([ipa-server],</span>
- AC_CONFIG_HEADERS([config.h])
- AC_CONFIG_SUBDIRS([../asn1])
+<span class="gh">diff --git a/daemons/configure.ac b/daemons/configure.ac</span><span class="w"></span>
+<span class="gh">index 2906def..8dce469 100644</span><span class="w"></span>
+<span class="gd">--- a/daemons/configure.ac</span><span class="w"></span>
+<span class="gi">+++ b/daemons/configure.ac</span><span class="w"></span>
+<span class="gu">@@ -7,7 +7,7 @@ AC_INIT([ipa-server],</span><span class="w"></span>
+<span class="w"> </span>AC_CONFIG_HEADERS([config.h])<span class="w"></span>
+<span class="w"> </span>AC_CONFIG_SUBDIRS([../asn1])<span class="w"></span>
 
-<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span>
-<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span>
- m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
+<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span><span class="w"></span>
+<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span><span class="w"></span>
+<span class="w"> </span>m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])<span class="w"></span>
 
- AM_MAINTAINER_MODE
-</pre></div>
-
+<span class="w"> </span>AM_MAINTAINER_MODE<span class="w"></span>
+</code></pre></div>
 
 <p>And the result:</p>
-<div class="highlight"><pre><span></span>make[1]: Entering directory &#39;/home/blipton/src/freeipa/dist/freeipa-4.3.90.201606021746GIT63b597d/client&#39;
+<div class="highlight"><pre><span></span><code>make[1]: Entering directory &#39;/home/blipton/src/freeipa/dist/freeipa-4.3.90.201606021746GIT63b597d/client&#39;
 Makefile:704: ../util/.deps/ipa_krb5.Po: No such file or directory
-</pre></div>
-
+</code></pre></div>
 
 <p>So what's happening here? If we search for the missing file:</p>
-<div class="highlight"><pre><span></span>$ find -name ipa_krb5.Po
+<div class="highlight"><pre><span></span><code>$ find -name ipa_krb5.Po
 ./client/<span class="k">$(</span>KRB5_UTIL_DIR<span class="k">)</span>/.deps/ipa_krb5.Po
-</pre></div>
-
+</code></pre></div>
 
 <p>we see that it's in a very odd place, a directory literally named
 <code>$(KRB5_UTIL_DIR)</code>. It turns out this is a known issue with automatic
@@ -127,102 +123,100 @@ which this is derived includes, say, <code>$(KRB5_UTIL_DIR)/ipa_krb5.c</code>,
 config.status ends up making the oddly-named directory mentioned above.</p>
 <h2 id="step-2-no-variables-in-paths">Step 2: No variables in paths</h2>
 <p>Ok, so we can't use variable references in our SOURCES. What if we expand all the variables, like this?</p>
-<div class="highlight"><pre><span></span><span class="gh">diff --git a/client/Makefile.am b/client/Makefile.am</span>
-<span class="gh">index 3d135a3..3c9f4bb 100644</span>
-<span class="gd">--- a/client/Makefile.am</span>
-<span class="gi">+++ b/client/Makefile.am</span>
-<span class="gu">@@ -13,7 +13,7 @@ endif</span>
- export AM_CFLAGS
+<div class="highlight"><pre><span></span><code><span class="gh">diff --git a/client/Makefile.am b/client/Makefile.am</span><span class="w"></span>
+<span class="gh">index 3d135a3..3c9f4bb 100644</span><span class="w"></span>
+<span class="gd">--- a/client/Makefile.am</span><span class="w"></span>
+<span class="gi">+++ b/client/Makefile.am</span><span class="w"></span>
+<span class="gu">@@ -13,7 +13,7 @@ endif</span><span class="w"></span>
+<span class="w"> </span>export AM_CFLAGS<span class="w"></span>
 
- KRB5_UTIL_DIR=../util
-<span class="gd">-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c</span>
-<span class="gi">+KRB5_UTIL_SRCS=../util/ipa_krb5.c</span>
- ASN1_UTIL_DIR=../asn1
- IPA_CONF_FILE=$(sysconfdir)/ipa/default.conf
+<span class="w"> </span>KRB5_UTIL_DIR=../util<span class="w"></span>
+<span class="gd">-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c</span><span class="w"></span>
+<span class="gi">+KRB5_UTIL_SRCS=../util/ipa_krb5.c</span><span class="w"></span>
+<span class="w"> </span>ASN1_UTIL_DIR=../asn1<span class="w"></span>
+<span class="w"> </span>IPA_CONF_FILE=$(sysconfdir)/ipa/default.conf<span class="w"></span>
 
-<span class="gh">diff --git a/client/configure.ac b/client/configure.ac</span>
-<span class="gh">index 58f23af..a97edd1 100644</span>
-<span class="gd">--- a/client/configure.ac</span>
-<span class="gi">+++ b/client/configure.ac</span>
-<span class="gu">@@ -8,7 +8,7 @@ LT_INIT</span>
- AC_CONFIG_HEADERS([config.h])
- AC_CONFIG_SUBDIRS([../asn1])
+<span class="gh">diff --git a/client/configure.ac b/client/configure.ac</span><span class="w"></span>
+<span class="gh">index 58f23af..a97edd1 100644</span><span class="w"></span>
+<span class="gd">--- a/client/configure.ac</span><span class="w"></span>
+<span class="gi">+++ b/client/configure.ac</span><span class="w"></span>
+<span class="gu">@@ -8,7 +8,7 @@ LT_INIT</span><span class="w"></span>
+<span class="w"> </span>AC_CONFIG_HEADERS([config.h])<span class="w"></span>
+<span class="w"> </span>AC_CONFIG_SUBDIRS([../asn1])<span class="w"></span>
 
-<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span>
-<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span>
+<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span><span class="w"></span>
+<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span><span class="w"></span>
 
- AM_MAINTAINER_MODE
+<span class="w"> </span>AM_MAINTAINER_MODE<span class="w"></span>
 
-<span class="gh">diff --git a/daemons/configure.ac b/daemons/configure.ac</span>
-<span class="gh">index 2906def..8dce469 100644</span>
-<span class="gd">--- a/daemons/configure.ac</span>
-<span class="gi">+++ b/daemons/configure.ac</span>
-<span class="gu">@@ -7,7 +7,7 @@ AC_INIT([ipa-server],</span>
- AC_CONFIG_HEADERS([config.h])
- AC_CONFIG_SUBDIRS([../asn1])
+<span class="gh">diff --git a/daemons/configure.ac b/daemons/configure.ac</span><span class="w"></span>
+<span class="gh">index 2906def..8dce469 100644</span><span class="w"></span>
+<span class="gd">--- a/daemons/configure.ac</span><span class="w"></span>
+<span class="gi">+++ b/daemons/configure.ac</span><span class="w"></span>
+<span class="gu">@@ -7,7 +7,7 @@ AC_INIT([ipa-server],</span><span class="w"></span>
+<span class="w"> </span>AC_CONFIG_HEADERS([config.h])<span class="w"></span>
+<span class="w"> </span>AC_CONFIG_SUBDIRS([../asn1])<span class="w"></span>
 
-<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span>
-<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span>
- m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
+<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span><span class="w"></span>
+<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span><span class="w"></span>
+<span class="w"> </span>m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])<span class="w"></span>
 
- AM_MAINTAINER_MODE
-<span class="gh">diff --git a/daemons/ipa-kdb/Makefile.am b/daemons/ipa-kdb/Makefile.am</span>
-<span class="gh">index a4ea366..a4a970a 100644</span>
-<span class="gd">--- a/daemons/ipa-kdb/Makefile.am</span>
-<span class="gi">+++ b/daemons/ipa-kdb/Makefile.am</span>
-<span class="gu">@@ -2,8 +2,8 @@ NULL =</span>
+<span class="w"> </span>AM_MAINTAINER_MODE<span class="w"></span>
+<span class="gh">diff --git a/daemons/ipa-kdb/Makefile.am b/daemons/ipa-kdb/Makefile.am</span><span class="w"></span>
+<span class="gh">index a4ea366..a4a970a 100644</span><span class="w"></span>
+<span class="gd">--- a/daemons/ipa-kdb/Makefile.am</span><span class="w"></span>
+<span class="gi">+++ b/daemons/ipa-kdb/Makefile.am</span><span class="w"></span>
+<span class="gu">@@ -2,8 +2,8 @@ NULL =</span><span class="w"></span>
 
- KRB5_UTIL_DIR = ../../util
- IPA_UTIL_DIR = ../../../util
-<span class="gd">-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \</span>
-<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd.c</span>
-<span class="gi">+KRB5_UTIL_SRCS = ../../util/ipa_krb5.c \</span>
-<span class="gi">+        ../../util/ipa_pwd.c</span>
+<span class="w"> </span>KRB5_UTIL_DIR = ../../util<span class="w"></span>
+<span class="w"> </span>IPA_UTIL_DIR = ../../../util<span class="w"></span>
+<span class="gd">-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \</span><span class="w"></span>
+<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd.c</span><span class="w"></span>
+<span class="gi">+KRB5_UTIL_SRCS = ../../util/ipa_krb5.c \</span><span class="w"></span>
+<span class="gi">+        ../../util/ipa_pwd.c</span><span class="w"></span>
 
- AM_CPPFLAGS =                      \
-    -I.                     \
-<span class="gh">diff --git a/daemons/ipa-sam/Makefile.am b/daemons/ipa-sam/Makefile.am</span>
-<span class="gh">index ea14661..66ffdff 100644</span>
-<span class="gd">--- a/daemons/ipa-sam/Makefile.am</span>
-<span class="gi">+++ b/daemons/ipa-sam/Makefile.am</span>
-<span class="gu">@@ -7,7 +7,7 @@ SAMBA40EXTRA_LIBS = $(SAMBA40EXTRA_LIBPATH) \</span>
-            $(NULL)
+<span class="w"> </span>AM_CPPFLAGS =                      \<span class="w"></span>
+<span class="w"> </span>   -I.                     \<span class="w"></span>
+<span class="gh">diff --git a/daemons/ipa-sam/Makefile.am b/daemons/ipa-sam/Makefile.am</span><span class="w"></span>
+<span class="gh">index ea14661..66ffdff 100644</span><span class="w"></span>
+<span class="gd">--- a/daemons/ipa-sam/Makefile.am</span><span class="w"></span>
+<span class="gi">+++ b/daemons/ipa-sam/Makefile.am</span><span class="w"></span>
+<span class="gu">@@ -7,7 +7,7 @@ SAMBA40EXTRA_LIBS = $(SAMBA40EXTRA_LIBPATH) \</span><span class="w"></span>
+<span class="w"> </span>           $(NULL)<span class="w"></span>
 
- KRB5_UTIL_DIR=../../util
-<span class="gd">-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c</span>
-<span class="gi">+KRB5_UTIL_SRCS=../../util/ipa_krb5.c ../../util/ipa_pwd_ntlm.c</span>
- ASN1_UTIL_DIR=../../asn1
+<span class="w"> </span>KRB5_UTIL_DIR=../../util<span class="w"></span>
+<span class="gd">-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c</span><span class="w"></span>
+<span class="gi">+KRB5_UTIL_SRCS=../../util/ipa_krb5.c ../../util/ipa_pwd_ntlm.c</span><span class="w"></span>
+<span class="w"> </span>ASN1_UTIL_DIR=../../asn1<span class="w"></span>
 
- AM_CPPFLAGS =                      \
-<span class="gh">diff --git a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span>
-<span class="gh">index 46a6491..cf0ffbd 100644</span>
-<span class="gd">--- a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span>
-<span class="gi">+++ b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span>
-<span class="gu">@@ -3,9 +3,9 @@ NULL =</span>
- MAINTAINERCLEANFILES = *~ Makefile.in
- PLUGIN_COMMON_DIR = ../common
- KRB5_UTIL_DIR = ../../../util
-<span class="gd">-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \</span>
-<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd.c \</span>
-<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c</span>
-<span class="gi">+KRB5_UTIL_SRCS = ../../../util/ipa_krb5.c \</span>
-<span class="gi">+        ../../../util/ipa_pwd.c \</span>
-<span class="gi">+        ../../../util/ipa_pwd_ntlm.c</span>
- ASN1_UTIL_DIR=../../../asn1
+<span class="w"> </span>AM_CPPFLAGS =                      \<span class="w"></span>
+<span class="gh">diff --git a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span><span class="w"></span>
+<span class="gh">index 46a6491..cf0ffbd 100644</span><span class="w"></span>
+<span class="gd">--- a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span><span class="w"></span>
+<span class="gi">+++ b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span><span class="w"></span>
+<span class="gu">@@ -3,9 +3,9 @@ NULL =</span><span class="w"></span>
+<span class="w"> </span>MAINTAINERCLEANFILES = *~ Makefile.in<span class="w"></span>
+<span class="w"> </span>PLUGIN_COMMON_DIR = ../common<span class="w"></span>
+<span class="w"> </span>KRB5_UTIL_DIR = ../../../util<span class="w"></span>
+<span class="gd">-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \</span><span class="w"></span>
+<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd.c \</span><span class="w"></span>
+<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c</span><span class="w"></span>
+<span class="gi">+KRB5_UTIL_SRCS = ../../../util/ipa_krb5.c \</span><span class="w"></span>
+<span class="gi">+        ../../../util/ipa_pwd.c \</span><span class="w"></span>
+<span class="gi">+        ../../../util/ipa_pwd_ntlm.c</span><span class="w"></span>
+<span class="w"> </span>ASN1_UTIL_DIR=../../../asn1<span class="w"></span>
 
- AM_CPPFLAGS =                          \
-</pre></div>
-
+<span class="w"> </span>AM_CPPFLAGS =                          \<span class="w"></span>
+</code></pre></div>
 
 <p>Now we have a different problem:</p>
-<div class="highlight"><pre><span></span>Making distclean in ipa-pwd-extop
+<div class="highlight"><pre><span></span><code>Making distclean in ipa-pwd-extop
 make[3]: Entering directory &#39;/home/blipton/src/freeipa/dist/freeipa-4.3.90.201606021827GIT4becc18/daemons/ipa-slapi-plugins/ipa-pwd-extop&#39;
 Makefile:535: ../../../util/.deps/ipa_krb5.Plo: No such file or directory
 Makefile:536: ../../../util/.deps/ipa_pwd.Plo: No such file or directory
 Makefile:537: ../../../util/.deps/ipa_pwd_ntlm.Plo: No such file or directory
 make[3]: *** No rule to make target &#39;../../../util/.deps/ipa_pwd_ntlm.Plo&#39;.  Stop.
-</pre></div>
-
+</code></pre></div>
 
 <p>Here it turns out that because <code>util/.deps</code> is used by more than one Makefile in
 the subdirectories of <code>daemons</code>, it is being removed by <code>make distclean</code> running
@@ -239,246 +233,244 @@ up the same files. So maybe it would be better to make utils its own project,
 repsonsible for building the files within that directory, and simply have the
 other projects depend on it. This is the same as what happens in the <code>asn1</code>
 directory of the source tree. The following patch implements this approach:</p>
-<div class="highlight"><pre><span></span><span class="gh">diff --git a/Makefile b/Makefile</span>
-<span class="gh">index 210b7ac..6e00220 100644</span>
-<span class="gd">--- a/Makefile</span>
-<span class="gi">+++ b/Makefile</span>
-<span class="gu">@@ -3,7 +3,7 @@</span>
+<div class="highlight"><pre><span></span><code><span class="gh">diff --git a/Makefile b/Makefile</span><span class="w"></span>
+<span class="gh">index 210b7ac..6e00220 100644</span><span class="w"></span>
+<span class="gd">--- a/Makefile</span><span class="w"></span>
+<span class="gi">+++ b/Makefile</span><span class="w"></span>
+<span class="gu">@@ -3,7 +3,7 @@</span><span class="w"></span>
 
- include VERSION
+<span class="w"> </span>include VERSION<span class="w"></span>
 
-<span class="gd">-SUBDIRS=asn1 daemons install ipapython ipalib</span>
-<span class="gi">+SUBDIRS=util asn1 daemons install ipapython ipalib</span>
- CLIENTDIRS=ipapython ipalib client asn1
- CLIENTPYDIRS=ipaclient ipaplatform
+<span class="gd">-SUBDIRS=asn1 daemons install ipapython ipalib</span><span class="w"></span>
+<span class="gi">+SUBDIRS=util asn1 daemons install ipapython ipalib</span><span class="w"></span>
+<span class="w"> </span>CLIENTDIRS=ipapython ipalib client asn1<span class="w"></span>
+<span class="w"> </span>CLIENTPYDIRS=ipaclient ipaplatform<span class="w"></span>
 
-<span class="gh">diff --git a/client/Makefile.am b/client/Makefile.am</span>
-<span class="gh">index 3d135a3..afc2977 100644</span>
-<span class="gd">--- a/client/Makefile.am</span>
-<span class="gi">+++ b/client/Makefile.am</span>
-<span class="gu">@@ -13,7 +13,7 @@ endif</span>
- export AM_CFLAGS
+<span class="gh">diff --git a/client/Makefile.am b/client/Makefile.am</span><span class="w"></span>
+<span class="gh">index 3d135a3..afc2977 100644</span><span class="w"></span>
+<span class="gd">--- a/client/Makefile.am</span><span class="w"></span>
+<span class="gi">+++ b/client/Makefile.am</span><span class="w"></span>
+<span class="gu">@@ -13,7 +13,7 @@ endif</span><span class="w"></span>
+<span class="w"> </span>export AM_CFLAGS<span class="w"></span>
 
- KRB5_UTIL_DIR=../util
-<span class="gd">-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c</span>
-<span class="gi">+KRB5_UTIL_LIBS=../util/ipa_krb5.la</span>
- ASN1_UTIL_DIR=../asn1
- IPA_CONF_FILE=$(sysconfdir)/ipa/default.conf
+<span class="w"> </span>KRB5_UTIL_DIR=../util<span class="w"></span>
+<span class="gd">-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c</span><span class="w"></span>
+<span class="gi">+KRB5_UTIL_LIBS=../util/ipa_krb5.la</span><span class="w"></span>
+<span class="w"> </span>ASN1_UTIL_DIR=../asn1<span class="w"></span>
+<span class="w"> </span>IPA_CONF_FILE=$(sysconfdir)/ipa/default.conf<span class="w"></span>
 
-<span class="gu">@@ -52,7 +52,6 @@ sbin_SCRIPTS =            \</span>
- ipa_getkeytab_SOURCES =        \
-    ipa-getkeytab.c     \
-    ipa-client-common.c \
-<span class="gd">-   $(KRB5_UTIL_SRCS)   \</span>
-    $(NULL)
+<span class="gu">@@ -52,7 +52,6 @@ sbin_SCRIPTS =            \</span><span class="w"></span>
+<span class="w"> </span>ipa_getkeytab_SOURCES =        \<span class="w"></span>
+<span class="w"> </span>   ipa-getkeytab.c     \<span class="w"></span>
+<span class="w"> </span>   ipa-client-common.c \<span class="w"></span>
+<span class="gd">-   $(KRB5_UTIL_SRCS)   \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
 
- ipa_getkeytab_LDADD =      \
-<span class="gu">@@ -63,6 +62,7 @@ ipa_getkeytab_LDADD =         \</span>
-    $(POPT_LIBS)        \
-    $(LIBINTL_LIBS)         \
-    $(INI_LIBS)     \
-<span class="gi">+   $(KRB5_UTIL_LIBS)   \</span>
-    $(NULL)
+<span class="w"> </span>ipa_getkeytab_LDADD =      \<span class="w"></span>
+<span class="gu">@@ -63,6 +62,7 @@ ipa_getkeytab_LDADD =         \</span><span class="w"></span>
+<span class="w"> </span>   $(POPT_LIBS)        \<span class="w"></span>
+<span class="w"> </span>   $(LIBINTL_LIBS)         \<span class="w"></span>
+<span class="w"> </span>   $(INI_LIBS)     \<span class="w"></span>
+<span class="gi">+   $(KRB5_UTIL_LIBS)   \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
 
- ipa_rmkeytab_SOURCES =     \
-<span class="gh">diff --git a/client/configure.ac b/client/configure.ac</span>
-<span class="gh">index 58f23af..836cac4 100644</span>
-<span class="gd">--- a/client/configure.ac</span>
-<span class="gi">+++ b/client/configure.ac</span>
-<span class="gu">@@ -6,9 +6,9 @@ AC_INIT([ipa-client],</span>
- LT_INIT
+<span class="w"> </span>ipa_rmkeytab_SOURCES =     \<span class="w"></span>
+<span class="gh">diff --git a/client/configure.ac b/client/configure.ac</span><span class="w"></span>
+<span class="gh">index 58f23af..836cac4 100644</span><span class="w"></span>
+<span class="gd">--- a/client/configure.ac</span><span class="w"></span>
+<span class="gi">+++ b/client/configure.ac</span><span class="w"></span>
+<span class="gu">@@ -6,9 +6,9 @@ AC_INIT([ipa-client],</span><span class="w"></span>
+<span class="w"> </span>LT_INIT<span class="w"></span>
 
- AC_CONFIG_HEADERS([config.h])
-<span class="gd">-AC_CONFIG_SUBDIRS([../asn1])</span>
-<span class="gi">+AC_CONFIG_SUBDIRS([../util ../asn1])</span>
+<span class="w"> </span>AC_CONFIG_HEADERS([config.h])<span class="w"></span>
+<span class="gd">-AC_CONFIG_SUBDIRS([../asn1])</span><span class="w"></span>
+<span class="gi">+AC_CONFIG_SUBDIRS([../util ../asn1])</span><span class="w"></span>
 
-<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span>
-<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span>
+<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span><span class="w"></span>
+<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span><span class="w"></span>
 
- AM_MAINTAINER_MODE
+<span class="w"> </span>AM_MAINTAINER_MODE<span class="w"></span>
 
-<span class="gh">diff --git a/daemons/configure.ac b/daemons/configure.ac</span>
-<span class="gh">index 2906def..f27312f 100644</span>
-<span class="gd">--- a/daemons/configure.ac</span>
-<span class="gi">+++ b/daemons/configure.ac</span>
-<span class="gu">@@ -5,9 +5,9 @@ AC_INIT([ipa-server],</span>
-         [https://hosted.fedoraproject.org/projects/freeipa/newticket])
+<span class="gh">diff --git a/daemons/configure.ac b/daemons/configure.ac</span><span class="w"></span>
+<span class="gh">index 2906def..f27312f 100644</span><span class="w"></span>
+<span class="gd">--- a/daemons/configure.ac</span><span class="w"></span>
+<span class="gi">+++ b/daemons/configure.ac</span><span class="w"></span>
+<span class="gu">@@ -5,9 +5,9 @@ AC_INIT([ipa-server],</span><span class="w"></span>
+<span class="w"> </span>        [https://hosted.fedoraproject.org/projects/freeipa/newticket])<span class="w"></span>
 
- AC_CONFIG_HEADERS([config.h])
-<span class="gd">-AC_CONFIG_SUBDIRS([../asn1])</span>
-<span class="gi">+AC_CONFIG_SUBDIRS([../util ../asn1])</span>
+<span class="w"> </span>AC_CONFIG_HEADERS([config.h])<span class="w"></span>
+<span class="gd">-AC_CONFIG_SUBDIRS([../asn1])</span><span class="w"></span>
+<span class="gi">+AC_CONFIG_SUBDIRS([../util ../asn1])</span><span class="w"></span>
 
-<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span>
-<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span>
- m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
+<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span><span class="w"></span>
+<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span><span class="w"></span>
+<span class="w"> </span>m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])<span class="w"></span>
 
- AM_MAINTAINER_MODE
-<span class="gh">diff --git a/daemons/ipa-kdb/Makefile.am b/daemons/ipa-kdb/Makefile.am</span>
-<span class="gh">index a4ea366..2f8bcfb 100644</span>
-<span class="gd">--- a/daemons/ipa-kdb/Makefile.am</span>
-<span class="gi">+++ b/daemons/ipa-kdb/Makefile.am</span>
-<span class="gu">@@ -2,8 +2,8 @@ NULL =</span>
+<span class="w"> </span>AM_MAINTAINER_MODE<span class="w"></span>
+<span class="gh">diff --git a/daemons/ipa-kdb/Makefile.am b/daemons/ipa-kdb/Makefile.am</span><span class="w"></span>
+<span class="gh">index a4ea366..2f8bcfb 100644</span><span class="w"></span>
+<span class="gd">--- a/daemons/ipa-kdb/Makefile.am</span><span class="w"></span>
+<span class="gi">+++ b/daemons/ipa-kdb/Makefile.am</span><span class="w"></span>
+<span class="gu">@@ -2,8 +2,8 @@ NULL =</span><span class="w"></span>
 
- KRB5_UTIL_DIR = ../../util
- IPA_UTIL_DIR = ../../../util
-<span class="gd">-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \</span>
-<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd.c</span>
-<span class="gi">+KRB5_UTIL_LIBS = ../../util/ipa_krb5.la \</span>
-<span class="gi">+        ../../util/ipa_pwd.la</span>
+<span class="w"> </span>KRB5_UTIL_DIR = ../../util<span class="w"></span>
+<span class="w"> </span>IPA_UTIL_DIR = ../../../util<span class="w"></span>
+<span class="gd">-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \</span><span class="w"></span>
+<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd.c</span><span class="w"></span>
+<span class="gi">+KRB5_UTIL_LIBS = ../../util/ipa_krb5.la \</span><span class="w"></span>
+<span class="gi">+        ../../util/ipa_pwd.la</span><span class="w"></span>
 
- AM_CPPFLAGS =                      \
-    -I.                     \
-<span class="gu">@@ -39,7 +39,6 @@ ipadb_la_SOURCES =        \</span>
-    ipa_kdb_mspac.c     \
-    ipa_kdb_delegation.c    \
-    ipa_kdb_audit_as.c  \
-<span class="gd">-   $(KRB5_UTIL_SRCS)   \</span>
-    $(NULL)
+<span class="w"> </span>AM_CPPFLAGS =                      \<span class="w"></span>
+<span class="w"> </span>   -I.                     \<span class="w"></span>
+<span class="gu">@@ -39,7 +39,6 @@ ipadb_la_SOURCES =        \</span><span class="w"></span>
+<span class="w"> </span>   ipa_kdb_mspac.c     \<span class="w"></span>
+<span class="w"> </span>   ipa_kdb_delegation.c    \<span class="w"></span>
+<span class="w"> </span>   ipa_kdb_audit_as.c  \<span class="w"></span>
+<span class="gd">-   $(KRB5_UTIL_SRCS)   \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
 
- ipadb_la_LDFLAGS =         \
-<span class="gu">@@ -53,6 +52,7 @@ ipadb_la_LIBADD =         \</span>
-    $(NDRPAC_LIBS)      \
-    $(UNISTRING_LIBS)   \
-    $(NSS_LIBS)             \
-<span class="gi">+   $(KRB5_UTIL_LIBS)   \</span>
-    $(NULL)
+<span class="w"> </span>ipadb_la_LDFLAGS =         \<span class="w"></span>
+<span class="gu">@@ -53,6 +52,7 @@ ipadb_la_LIBADD =         \</span><span class="w"></span>
+<span class="w"> </span>   $(NDRPAC_LIBS)      \<span class="w"></span>
+<span class="w"> </span>   $(UNISTRING_LIBS)   \<span class="w"></span>
+<span class="w"> </span>   $(NSS_LIBS)             \<span class="w"></span>
+<span class="gi">+   $(KRB5_UTIL_LIBS)   \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
 
- if HAVE_CMOCKA
-<span class="gu">@@ -71,7 +71,6 @@ ipa_kdb_tests_SOURCES =        \</span>
-        ipa_kdb_mspac.c         \
-        ipa_kdb_delegation.c    \
-        ipa_kdb_audit_as.c      \
-<span class="gd">-       $(KRB5_UTIL_SRCS)       \</span>
-        $(NULL)
- ipa_kdb_tests_CFLAGS = $(CMOCKA_CFLAGS)
- ipa_kdb_tests_LDADD =          \
-<span class="gu">@@ -81,6 +80,7 @@ ipa_kdb_tests_LDADD =          \</span>
-        $(NDRPAC_LIBS)          \
-        $(UNISTRING_LIBS)       \
-        $(NSS_LIBS)             \
-<span class="gi">+       $(KRB5_UTIL_LIBS)       \</span>
-        -lkdb5                  \
-        -lsss_idmap             \
-        $(NULL)
-<span class="gh">diff --git a/daemons/ipa-sam/Makefile.am b/daemons/ipa-sam/Makefile.am</span>
-<span class="gh">index ea14661..17d77aa 100644</span>
-<span class="gd">--- a/daemons/ipa-sam/Makefile.am</span>
-<span class="gi">+++ b/daemons/ipa-sam/Makefile.am</span>
-<span class="gu">@@ -7,7 +7,7 @@ SAMBA40EXTRA_LIBS = $(SAMBA40EXTRA_LIBPATH) \</span>
-            $(NULL)
+<span class="w"> </span>if HAVE_CMOCKA<span class="w"></span>
+<span class="gu">@@ -71,7 +71,6 @@ ipa_kdb_tests_SOURCES =        \</span><span class="w"></span>
+<span class="w"> </span>       ipa_kdb_mspac.c         \<span class="w"></span>
+<span class="w"> </span>       ipa_kdb_delegation.c    \<span class="w"></span>
+<span class="w"> </span>       ipa_kdb_audit_as.c      \<span class="w"></span>
+<span class="gd">-       $(KRB5_UTIL_SRCS)       \</span><span class="w"></span>
+<span class="w"> </span>       $(NULL)<span class="w"></span>
+<span class="w"> </span>ipa_kdb_tests_CFLAGS = $(CMOCKA_CFLAGS)<span class="w"></span>
+<span class="w"> </span>ipa_kdb_tests_LDADD =          \<span class="w"></span>
+<span class="gu">@@ -81,6 +80,7 @@ ipa_kdb_tests_LDADD =          \</span><span class="w"></span>
+<span class="w"> </span>       $(NDRPAC_LIBS)          \<span class="w"></span>
+<span class="w"> </span>       $(UNISTRING_LIBS)       \<span class="w"></span>
+<span class="w"> </span>       $(NSS_LIBS)             \<span class="w"></span>
+<span class="gi">+       $(KRB5_UTIL_LIBS)       \</span><span class="w"></span>
+<span class="w"> </span>       -lkdb5                  \<span class="w"></span>
+<span class="w"> </span>       -lsss_idmap             \<span class="w"></span>
+<span class="w"> </span>       $(NULL)<span class="w"></span>
+<span class="gh">diff --git a/daemons/ipa-sam/Makefile.am b/daemons/ipa-sam/Makefile.am</span><span class="w"></span>
+<span class="gh">index ea14661..17d77aa 100644</span><span class="w"></span>
+<span class="gd">--- a/daemons/ipa-sam/Makefile.am</span><span class="w"></span>
+<span class="gi">+++ b/daemons/ipa-sam/Makefile.am</span><span class="w"></span>
+<span class="gu">@@ -7,7 +7,7 @@ SAMBA40EXTRA_LIBS = $(SAMBA40EXTRA_LIBPATH) \</span><span class="w"></span>
+<span class="w"> </span>           $(NULL)<span class="w"></span>
 
- KRB5_UTIL_DIR=../../util
-<span class="gd">-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c</span>
-<span class="gi">+KRB5_UTIL_LIBS=../../util/ipa_krb5.la ../../util/ipa_pwd_ntlm.la</span>
- ASN1_UTIL_DIR=../../asn1
+<span class="w"> </span>KRB5_UTIL_DIR=../../util<span class="w"></span>
+<span class="gd">-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c</span><span class="w"></span>
+<span class="gi">+KRB5_UTIL_LIBS=../../util/ipa_krb5.la ../../util/ipa_pwd_ntlm.la</span><span class="w"></span>
+<span class="w"> </span>ASN1_UTIL_DIR=../../asn1<span class="w"></span>
 
- AM_CPPFLAGS =                      \
-<span class="gu">@@ -39,7 +39,6 @@ plugin_LTLIBRARIES =      \</span>
+<span class="w"> </span>AM_CPPFLAGS =                      \<span class="w"></span>
+<span class="gu">@@ -39,7 +39,6 @@ plugin_LTLIBRARIES =      \</span><span class="w"></span>
 
- ipasam_la_SOURCES =        \
-    ipa_sam.c       \
-<span class="gd">-   $(KRB5_UTIL_SRCS)   \</span>
-    $(NULL)
+<span class="w"> </span>ipasam_la_SOURCES =        \<span class="w"></span>
+<span class="w"> </span>   ipa_sam.c       \<span class="w"></span>
+<span class="gd">-   $(KRB5_UTIL_SRCS)   \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
 
- ipasam_la_LDFLAGS =        \
-<span class="gu">@@ -57,6 +56,7 @@ ipasam_la_LIBADD =        \</span>
-    $(SAMBA40EXTRA_LIBS)    \
-    $(SSSIDMAP_LIBS)    \
-    $(ASN1_UTIL_DIR)/libipaasn1.la  \
-<span class="gi">+   $(KRB5_UTIL_LIBS)   \</span>
-    $(NULL)
+<span class="w"> </span>ipasam_la_LDFLAGS =        \<span class="w"></span>
+<span class="gu">@@ -57,6 +56,7 @@ ipasam_la_LIBADD =        \</span><span class="w"></span>
+<span class="w"> </span>   $(SAMBA40EXTRA_LIBS)    \<span class="w"></span>
+<span class="w"> </span>   $(SSSIDMAP_LIBS)    \<span class="w"></span>
+<span class="w"> </span>   $(ASN1_UTIL_DIR)/libipaasn1.la  \<span class="w"></span>
+<span class="gi">+   $(KRB5_UTIL_LIBS)   \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
 
- EXTRA_DIST =           \
-<span class="gh">diff --git a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span>
-<span class="gh">index 46a6491..50c9c66 100644</span>
-<span class="gd">--- a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span>
-<span class="gi">+++ b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span>
-<span class="gu">@@ -3,9 +3,9 @@ NULL =</span>
- MAINTAINERCLEANFILES = *~ Makefile.in
- PLUGIN_COMMON_DIR = ../common
- KRB5_UTIL_DIR = ../../../util
-<span class="gd">-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \</span>
-<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd.c \</span>
-<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c</span>
-<span class="gi">+KRB5_UTIL_LIBS = ../../../util/ipa_krb5.la \</span>
-<span class="gi">+        ../../../util/ipa_pwd.la \</span>
-<span class="gi">+        ../../../util/ipa_pwd_ntlm.la</span>
- ASN1_UTIL_DIR=../../../asn1
+<span class="w"> </span>EXTRA_DIST =           \<span class="w"></span>
+<span class="gh">diff --git a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span><span class="w"></span>
+<span class="gh">index 46a6491..50c9c66 100644</span><span class="w"></span>
+<span class="gd">--- a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span><span class="w"></span>
+<span class="gi">+++ b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span><span class="w"></span>
+<span class="gu">@@ -3,9 +3,9 @@ NULL =</span><span class="w"></span>
+<span class="w"> </span>MAINTAINERCLEANFILES = *~ Makefile.in<span class="w"></span>
+<span class="w"> </span>PLUGIN_COMMON_DIR = ../common<span class="w"></span>
+<span class="w"> </span>KRB5_UTIL_DIR = ../../../util<span class="w"></span>
+<span class="gd">-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \</span><span class="w"></span>
+<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd.c \</span><span class="w"></span>
+<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c</span><span class="w"></span>
+<span class="gi">+KRB5_UTIL_LIBS = ../../../util/ipa_krb5.la \</span><span class="w"></span>
+<span class="gi">+        ../../../util/ipa_pwd.la \</span><span class="w"></span>
+<span class="gi">+        ../../../util/ipa_pwd_ntlm.la</span><span class="w"></span>
+<span class="w"> </span>ASN1_UTIL_DIR=../../../asn1<span class="w"></span>
 
- AM_CPPFLAGS =                          \
-<span class="gu">@@ -41,6 +41,7 @@ plugin_LTLIBRARIES = libipa_pwd_extop.la</span>
- libipa_pwd_extop_la_LIBADD  = \
-    $(builddir)/../libotp/libotp.la \
-    $(ASN1_UTIL_DIR)/libipaasn1.la  \
-<span class="gi">+   $(KRB5_UTIL_LIBS)       \</span>
-    $(NULL)
- libipa_pwd_extop_la_SOURCES =      \
-    common.c            \
-<span class="gu">@@ -48,7 +49,6 @@ libipa_pwd_extop_la_SOURCES =         \</span>
-    prepost.c           \
-    ipa_pwd_extop.c         \
-    otpctrl.c           \
-<span class="gd">-   $(KRB5_UTIL_SRCS)       \</span>
-    $(NULL)
+<span class="w"> </span>AM_CPPFLAGS =                          \<span class="w"></span>
+<span class="gu">@@ -41,6 +41,7 @@ plugin_LTLIBRARIES = libipa_pwd_extop.la</span><span class="w"></span>
+<span class="w"> </span>libipa_pwd_extop_la_LIBADD  = \<span class="w"></span>
+<span class="w"> </span>   $(builddir)/../libotp/libotp.la \<span class="w"></span>
+<span class="w"> </span>   $(ASN1_UTIL_DIR)/libipaasn1.la  \<span class="w"></span>
+<span class="gi">+   $(KRB5_UTIL_LIBS)       \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
+<span class="w"> </span>libipa_pwd_extop_la_SOURCES =      \<span class="w"></span>
+<span class="w"> </span>   common.c            \<span class="w"></span>
+<span class="gu">@@ -48,7 +49,6 @@ libipa_pwd_extop_la_SOURCES =         \</span><span class="w"></span>
+<span class="w"> </span>   prepost.c           \<span class="w"></span>
+<span class="w"> </span>   ipa_pwd_extop.c         \<span class="w"></span>
+<span class="w"> </span>   otpctrl.c           \<span class="w"></span>
+<span class="gd">-   $(KRB5_UTIL_SRCS)       \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
 
- appdir = $(IPA_DATA_DIR)
-<span class="gh">diff --git a/util/Makefile.am b/util/Makefile.am</span>
-new file mode 100644
-<span class="gh">index 0000000..a848a7c</span>
-<span class="gd">--- /dev/null</span>
-<span class="gi">+++ b/util/Makefile.am</span>
-<span class="gu">@@ -0,0 +1,8 @@</span>
-<span class="gi">+#AM_CPPFLAGS = -I../util -Iasn1c</span>
-<span class="gi">+</span>
-<span class="gi">+noinst_LTLIBRARIES=libipa_krb5.la libipa_pwd.la libipa_pwd_ntlm.la</span>
-<span class="gi">+noinst_HEADERS=ipa_krb5.h ipa_mspac.h ipa_pwd.h</span>
-<span class="gi">+</span>
-<span class="gi">+libipa_krb5_la_SOURCES=ipa_krb5.c</span>
-<span class="gi">+libipa_pwd_la_SOURCES=ipa_pwd.c</span>
-<span class="gi">+libipa_pwd_ntlm_la_SOURCES=ipa_pwd_ntlm.c</span>
-<span class="gh">diff --git a/util/configure.ac b/util/configure.ac</span>
-new file mode 100644
-<span class="gh">index 0000000..2b323c1</span>
-<span class="gd">--- /dev/null</span>
-<span class="gi">+++ b/util/configure.ac</span>
-<span class="gu">@@ -0,0 +1,23 @@</span>
-<span class="gi">+AC_PREREQ(2.59)</span>
-<span class="gi">+m4_include(../version.m4)</span>
-<span class="gi">+AC_INIT([ipa-server],</span>
-<span class="gi">+        IPA_VERSION,</span>
-<span class="gi">+        [https://hosted.fedoraproject.org/projects/freeipa/newticket])</span>
-<span class="gi">+</span>
-<span class="gi">+AC_CONFIG_HEADERS([config.h])</span>
-<span class="gi">+AC_PROG_CC_C99</span>
-<span class="gi">+LT_INIT</span>
-<span class="gi">+</span>
-<span class="gi">+AM_INIT_AUTOMAKE([foreign])</span>
-<span class="gi">+</span>
-<span class="gi">+AM_MAINTAINER_MODE</span>
-<span class="gi">+</span>
-<span class="gi">+AC_SUBST(VERSION)</span>
-<span class="gi">+</span>
-<span class="gi">+# Files</span>
-<span class="gi">+</span>
-<span class="gi">+AC_CONFIG_FILES([</span>
-<span class="gi">+    Makefile</span>
-<span class="gi">+])</span>
-<span class="gi">+</span>
-<span class="gi">+AC_OUTPUT</span>
-</pre></div>
-
+<span class="w"> </span>appdir = $(IPA_DATA_DIR)<span class="w"></span>
+<span class="gh">diff --git a/util/Makefile.am b/util/Makefile.am</span><span class="w"></span>
+<span class="w">new file mode 100644</span>
+<span class="gh">index 0000000..a848a7c</span><span class="w"></span>
+<span class="gd">--- /dev/null</span><span class="w"></span>
+<span class="gi">+++ b/util/Makefile.am</span><span class="w"></span>
+<span class="gu">@@ -0,0 +1,8 @@</span><span class="w"></span>
+<span class="gi">+#AM_CPPFLAGS = -I../util -Iasn1c</span><span class="w"></span>
+<span class="gi">+</span><span class="w"></span>
+<span class="gi">+noinst_LTLIBRARIES=libipa_krb5.la libipa_pwd.la libipa_pwd_ntlm.la</span><span class="w"></span>
+<span class="gi">+noinst_HEADERS=ipa_krb5.h ipa_mspac.h ipa_pwd.h</span><span class="w"></span>
+<span class="gi">+</span><span class="w"></span>
+<span class="gi">+libipa_krb5_la_SOURCES=ipa_krb5.c</span><span class="w"></span>
+<span class="gi">+libipa_pwd_la_SOURCES=ipa_pwd.c</span><span class="w"></span>
+<span class="gi">+libipa_pwd_ntlm_la_SOURCES=ipa_pwd_ntlm.c</span><span class="w"></span>
+<span class="gh">diff --git a/util/configure.ac b/util/configure.ac</span><span class="w"></span>
+<span class="w">new file mode 100644</span>
+<span class="gh">index 0000000..2b323c1</span><span class="w"></span>
+<span class="gd">--- /dev/null</span><span class="w"></span>
+<span class="gi">+++ b/util/configure.ac</span><span class="w"></span>
+<span class="gu">@@ -0,0 +1,23 @@</span><span class="w"></span>
+<span class="gi">+AC_PREREQ(2.59)</span><span class="w"></span>
+<span class="gi">+m4_include(../version.m4)</span><span class="w"></span>
+<span class="gi">+AC_INIT([ipa-server],</span><span class="w"></span>
+<span class="gi">+        IPA_VERSION,</span><span class="w"></span>
+<span class="gi">+        [https://hosted.fedoraproject.org/projects/freeipa/newticket])</span><span class="w"></span>
+<span class="gi">+</span><span class="w"></span>
+<span class="gi">+AC_CONFIG_HEADERS([config.h])</span><span class="w"></span>
+<span class="gi">+AC_PROG_CC_C99</span><span class="w"></span>
+<span class="gi">+LT_INIT</span><span class="w"></span>
+<span class="gi">+</span><span class="w"></span>
+<span class="gi">+AM_INIT_AUTOMAKE([foreign])</span><span class="w"></span>
+<span class="gi">+</span><span class="w"></span>
+<span class="gi">+AM_MAINTAINER_MODE</span><span class="w"></span>
+<span class="gi">+</span><span class="w"></span>
+<span class="gi">+AC_SUBST(VERSION)</span><span class="w"></span>
+<span class="gi">+</span><span class="w"></span>
+<span class="gi">+# Files</span><span class="w"></span>
+<span class="gi">+</span><span class="w"></span>
+<span class="gi">+AC_CONFIG_FILES([</span><span class="w"></span>
+<span class="gi">+    Makefile</span><span class="w"></span>
+<span class="gi">+])</span><span class="w"></span>
+<span class="gi">+</span><span class="w"></span>
+<span class="gi">+AC_OUTPUT</span><span class="w"></span>
+</code></pre></div>
 
 <p>But being its own project means that the utils directory is now responsible for
 handling its own dependencies, which was previously done by the <code>configure.ac</code>
 files in the <code>client</code> and <code>daemons</code> directories. So with the simple
 <code>utils/configure.ac</code> file introduced by this patch, the build fails due to
 missing dependencies:</p>
-<div class="highlight"><pre><span></span>In file included from ipa_pwd_ntlm.c:30:0:
+<div class="highlight"><pre><span></span><code>In file included from ipa_pwd_ntlm.c:30:0:
 /usr/include/dirsrv/slapi-plugin.h:30:21: fatal error: prtypes.h: No such file or directory
 compilation terminated.
 Makefile:427: recipe for target &#39;ipa_pwd_ntlm.lo&#39; failed
-</pre></div>
-
+</code></pre></div>
 
 <p>We might be able to make this work by copying the necessary dependencies into
 the new configure.ac file. However, adding the maintenance burden of another
@@ -490,238 +482,234 @@ the work that's already being done by the existing configure scripts.</p>
 <code>utils</code> its own configure script, what if we just make the packages that need
 it responsible for generating its Makefile themselves? The following patch does
 this:</p>
-<div class="highlight"><pre><span></span><span class="gh">diff --git a/Makefile b/Makefile</span>
-<span class="gh">index 210b7ac..6e00220 100644</span>
-<span class="gd">--- a/Makefile</span>
-<span class="gi">+++ b/Makefile</span>
-<span class="gu">@@ -3,7 +3,7 @@</span>
+<div class="highlight"><pre><span></span><code><span class="gh">diff --git a/Makefile b/Makefile</span><span class="w"></span>
+<span class="gh">index 210b7ac..6e00220 100644</span><span class="w"></span>
+<span class="gd">--- a/Makefile</span><span class="w"></span>
+<span class="gi">+++ b/Makefile</span><span class="w"></span>
+<span class="gu">@@ -3,7 +3,7 @@</span><span class="w"></span>
 
- include VERSION
+<span class="w"> </span>include VERSION<span class="w"></span>
 
-<span class="gd">-SUBDIRS=asn1 daemons install ipapython ipalib</span>
-<span class="gi">+SUBDIRS=util asn1 daemons install ipapython ipalib</span>
- CLIENTDIRS=ipapython ipalib client asn1
- CLIENTPYDIRS=ipaclient ipaplatform
+<span class="gd">-SUBDIRS=asn1 daemons install ipapython ipalib</span><span class="w"></span>
+<span class="gi">+SUBDIRS=util asn1 daemons install ipapython ipalib</span><span class="w"></span>
+<span class="w"> </span>CLIENTDIRS=ipapython ipalib client asn1<span class="w"></span>
+<span class="w"> </span>CLIENTPYDIRS=ipaclient ipaplatform<span class="w"></span>
 
-<span class="gh">diff --git a/client/Makefile.am b/client/Makefile.am</span>
-<span class="gh">index 3d135a3..afc2977 100644</span>
-<span class="gd">--- a/client/Makefile.am</span>
-<span class="gi">+++ b/client/Makefile.am</span>
-<span class="gu">@@ -13,7 +13,7 @@ endif</span>
- export AM_CFLAGS
+<span class="gh">diff --git a/client/Makefile.am b/client/Makefile.am</span><span class="w"></span>
+<span class="gh">index 3d135a3..afc2977 100644</span><span class="w"></span>
+<span class="gd">--- a/client/Makefile.am</span><span class="w"></span>
+<span class="gi">+++ b/client/Makefile.am</span><span class="w"></span>
+<span class="gu">@@ -13,7 +13,7 @@ endif</span><span class="w"></span>
+<span class="w"> </span>export AM_CFLAGS<span class="w"></span>
 
- KRB5_UTIL_DIR=../util
-<span class="gd">-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c</span>
-<span class="gi">+KRB5_UTIL_LIBS=../util/ipa_krb5.la</span>
- ASN1_UTIL_DIR=../asn1
- IPA_CONF_FILE=$(sysconfdir)/ipa/default.conf
+<span class="w"> </span>KRB5_UTIL_DIR=../util<span class="w"></span>
+<span class="gd">-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c</span><span class="w"></span>
+<span class="gi">+KRB5_UTIL_LIBS=../util/ipa_krb5.la</span><span class="w"></span>
+<span class="w"> </span>ASN1_UTIL_DIR=../asn1<span class="w"></span>
+<span class="w"> </span>IPA_CONF_FILE=$(sysconfdir)/ipa/default.conf<span class="w"></span>
 
-<span class="gu">@@ -52,7 +52,6 @@ sbin_SCRIPTS =            \</span>
- ipa_getkeytab_SOURCES =        \
-    ipa-getkeytab.c     \
-    ipa-client-common.c \
-<span class="gd">-   $(KRB5_UTIL_SRCS)   \</span>
-    $(NULL)
+<span class="gu">@@ -52,7 +52,6 @@ sbin_SCRIPTS =            \</span><span class="w"></span>
+<span class="w"> </span>ipa_getkeytab_SOURCES =        \<span class="w"></span>
+<span class="w"> </span>   ipa-getkeytab.c     \<span class="w"></span>
+<span class="w"> </span>   ipa-client-common.c \<span class="w"></span>
+<span class="gd">-   $(KRB5_UTIL_SRCS)   \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
 
- ipa_getkeytab_LDADD =      \
-<span class="gu">@@ -63,6 +62,7 @@ ipa_getkeytab_LDADD =         \</span>
-    $(POPT_LIBS)        \
-    $(LIBINTL_LIBS)         \
-    $(INI_LIBS)     \
-<span class="gi">+   $(KRB5_UTIL_LIBS)   \</span>
-    $(NULL)
+<span class="w"> </span>ipa_getkeytab_LDADD =      \<span class="w"></span>
+<span class="gu">@@ -63,6 +62,7 @@ ipa_getkeytab_LDADD =         \</span><span class="w"></span>
+<span class="w"> </span>   $(POPT_LIBS)        \<span class="w"></span>
+<span class="w"> </span>   $(LIBINTL_LIBS)         \<span class="w"></span>
+<span class="w"> </span>   $(INI_LIBS)     \<span class="w"></span>
+<span class="gi">+   $(KRB5_UTIL_LIBS)   \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
 
- ipa_rmkeytab_SOURCES =     \
-<span class="gh">diff --git a/client/configure.ac b/client/configure.ac</span>
-<span class="gh">index 58f23af..4ca9caf 100644</span>
-<span class="gd">--- a/client/configure.ac</span>
-<span class="gi">+++ b/client/configure.ac</span>
-<span class="gu">@@ -8,7 +8,7 @@ LT_INIT</span>
- AC_CONFIG_HEADERS([config.h])
- AC_CONFIG_SUBDIRS([../asn1])
+<span class="w"> </span>ipa_rmkeytab_SOURCES =     \<span class="w"></span>
+<span class="gh">diff --git a/client/configure.ac b/client/configure.ac</span><span class="w"></span>
+<span class="gh">index 58f23af..4ca9caf 100644</span><span class="w"></span>
+<span class="gd">--- a/client/configure.ac</span><span class="w"></span>
+<span class="gi">+++ b/client/configure.ac</span><span class="w"></span>
+<span class="gu">@@ -8,7 +8,7 @@ LT_INIT</span><span class="w"></span>
+<span class="w"> </span>AC_CONFIG_HEADERS([config.h])<span class="w"></span>
+<span class="w"> </span>AC_CONFIG_SUBDIRS([../asn1])<span class="w"></span>
 
-<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span>
-<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span>
+<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span><span class="w"></span>
+<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span><span class="w"></span>
 
- AM_MAINTAINER_MODE
+<span class="w"> </span>AM_MAINTAINER_MODE<span class="w"></span>
 
-<span class="gu">@@ -220,6 +220,7 @@ dnl ---------------------------------------------------------------------------</span>
+<span class="gu">@@ -220,6 +220,7 @@ dnl ---------------------------------------------------------------------------</span><span class="w"></span>
 
- AC_CONFIG_FILES([
-     Makefile
-<span class="gi">+    ../util/Makefile</span>
-     ../asn1/Makefile
-     man/Makefile
- ])
-<span class="gh">diff --git a/daemons/configure.ac b/daemons/configure.ac</span>
-<span class="gh">index 2906def..761c15c 100644</span>
-<span class="gd">--- a/daemons/configure.ac</span>
-<span class="gi">+++ b/daemons/configure.ac</span>
-<span class="gu">@@ -7,7 +7,7 @@ AC_INIT([ipa-server],</span>
- AC_CONFIG_HEADERS([config.h])
- AC_CONFIG_SUBDIRS([../asn1])
+<span class="w"> </span>AC_CONFIG_FILES([<span class="w"></span>
+<span class="w"> </span>    Makefile<span class="w"></span>
+<span class="gi">+    ../util/Makefile</span><span class="w"></span>
+<span class="w"> </span>    ../asn1/Makefile<span class="w"></span>
+<span class="w"> </span>    man/Makefile<span class="w"></span>
+<span class="w"> </span>])<span class="w"></span>
+<span class="gh">diff --git a/daemons/configure.ac b/daemons/configure.ac</span><span class="w"></span>
+<span class="gh">index 2906def..761c15c 100644</span><span class="w"></span>
+<span class="gd">--- a/daemons/configure.ac</span><span class="w"></span>
+<span class="gi">+++ b/daemons/configure.ac</span><span class="w"></span>
+<span class="gu">@@ -7,7 +7,7 @@ AC_INIT([ipa-server],</span><span class="w"></span>
+<span class="w"> </span>AC_CONFIG_HEADERS([config.h])<span class="w"></span>
+<span class="w"> </span>AC_CONFIG_SUBDIRS([../asn1])<span class="w"></span>
 
-<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span>
-<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span>
- m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
+<span class="gd">-AM_INIT_AUTOMAKE([foreign])</span><span class="w"></span>
+<span class="gi">+AM_INIT_AUTOMAKE([foreign subdir-objects])</span><span class="w"></span>
+<span class="w"> </span>m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])<span class="w"></span>
 
- AM_MAINTAINER_MODE
-<span class="gu">@@ -332,6 +332,7 @@ AC_SUBST(LDFLAGS)</span>
- AC_CONFIG_FILES([
-     Makefile
-     ../asn1/Makefile
-<span class="gi">+    ../util/Makefile</span>
-     ipa-kdb/Makefile
-     ipa-sam/Makefile
-     ipa-otpd/Makefile
-<span class="gh">diff --git a/daemons/ipa-kdb/Makefile.am b/daemons/ipa-kdb/Makefile.am</span>
-<span class="gh">index a4ea366..2f8bcfb 100644</span>
-<span class="gd">--- a/daemons/ipa-kdb/Makefile.am</span>
-<span class="gi">+++ b/daemons/ipa-kdb/Makefile.am</span>
-<span class="gu">@@ -2,8 +2,8 @@ NULL =</span>
+<span class="w"> </span>AM_MAINTAINER_MODE<span class="w"></span>
+<span class="gu">@@ -332,6 +332,7 @@ AC_SUBST(LDFLAGS)</span><span class="w"></span>
+<span class="w"> </span>AC_CONFIG_FILES([<span class="w"></span>
+<span class="w"> </span>    Makefile<span class="w"></span>
+<span class="w"> </span>    ../asn1/Makefile<span class="w"></span>
+<span class="gi">+    ../util/Makefile</span><span class="w"></span>
+<span class="w"> </span>    ipa-kdb/Makefile<span class="w"></span>
+<span class="w"> </span>    ipa-sam/Makefile<span class="w"></span>
+<span class="w"> </span>    ipa-otpd/Makefile<span class="w"></span>
+<span class="gh">diff --git a/daemons/ipa-kdb/Makefile.am b/daemons/ipa-kdb/Makefile.am</span><span class="w"></span>
+<span class="gh">index a4ea366..2f8bcfb 100644</span><span class="w"></span>
+<span class="gd">--- a/daemons/ipa-kdb/Makefile.am</span><span class="w"></span>
+<span class="gi">+++ b/daemons/ipa-kdb/Makefile.am</span><span class="w"></span>
+<span class="gu">@@ -2,8 +2,8 @@ NULL =</span><span class="w"></span>
 
- KRB5_UTIL_DIR = ../../util
- IPA_UTIL_DIR = ../../../util
-<span class="gd">-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \</span>
-<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd.c</span>
-<span class="gi">+KRB5_UTIL_LIBS = ../../util/ipa_krb5.la \</span>
-<span class="gi">+        ../../util/ipa_pwd.la</span>
+<span class="w"> </span>KRB5_UTIL_DIR = ../../util<span class="w"></span>
+<span class="w"> </span>IPA_UTIL_DIR = ../../../util<span class="w"></span>
+<span class="gd">-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \</span><span class="w"></span>
+<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd.c</span><span class="w"></span>
+<span class="gi">+KRB5_UTIL_LIBS = ../../util/ipa_krb5.la \</span><span class="w"></span>
+<span class="gi">+        ../../util/ipa_pwd.la</span><span class="w"></span>
 
- AM_CPPFLAGS =                      \
-    -I.                     \
-<span class="gu">@@ -39,7 +39,6 @@ ipadb_la_SOURCES =        \</span>
-    ipa_kdb_mspac.c     \
-    ipa_kdb_delegation.c    \
-    ipa_kdb_audit_as.c  \
-<span class="gd">-   $(KRB5_UTIL_SRCS)   \</span>
-    $(NULL)
+<span class="w"> </span>AM_CPPFLAGS =                      \<span class="w"></span>
+<span class="w"> </span>   -I.                     \<span class="w"></span>
+<span class="gu">@@ -39,7 +39,6 @@ ipadb_la_SOURCES =        \</span><span class="w"></span>
+<span class="w"> </span>   ipa_kdb_mspac.c     \<span class="w"></span>
+<span class="w"> </span>   ipa_kdb_delegation.c    \<span class="w"></span>
+<span class="w"> </span>   ipa_kdb_audit_as.c  \<span class="w"></span>
+<span class="gd">-   $(KRB5_UTIL_SRCS)   \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
 
- ipadb_la_LDFLAGS =         \
-<span class="gu">@@ -53,6 +52,7 @@ ipadb_la_LIBADD =         \</span>
-    $(NDRPAC_LIBS)      \
-    $(UNISTRING_LIBS)   \
-    $(NSS_LIBS)             \
-<span class="gi">+   $(KRB5_UTIL_LIBS)   \</span>
-    $(NULL)
+<span class="w"> </span>ipadb_la_LDFLAGS =         \<span class="w"></span>
+<span class="gu">@@ -53,6 +52,7 @@ ipadb_la_LIBADD =         \</span><span class="w"></span>
+<span class="w"> </span>   $(NDRPAC_LIBS)      \<span class="w"></span>
+<span class="w"> </span>   $(UNISTRING_LIBS)   \<span class="w"></span>
+<span class="w"> </span>   $(NSS_LIBS)             \<span class="w"></span>
+<span class="gi">+   $(KRB5_UTIL_LIBS)   \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
 
- if HAVE_CMOCKA
-<span class="gu">@@ -71,7 +71,6 @@ ipa_kdb_tests_SOURCES =        \</span>
-        ipa_kdb_mspac.c         \
-        ipa_kdb_delegation.c    \
-        ipa_kdb_audit_as.c      \
-<span class="gd">-       $(KRB5_UTIL_SRCS)       \</span>
-        $(NULL)
- ipa_kdb_tests_CFLAGS = $(CMOCKA_CFLAGS)
- ipa_kdb_tests_LDADD =          \
-<span class="gu">@@ -81,6 +80,7 @@ ipa_kdb_tests_LDADD =          \</span>
-        $(NDRPAC_LIBS)          \
-        $(UNISTRING_LIBS)       \
-        $(NSS_LIBS)             \
-<span class="gi">+       $(KRB5_UTIL_LIBS)       \</span>
-        -lkdb5                  \
-        -lsss_idmap             \
-        $(NULL)
-<span class="gh">diff --git a/daemons/ipa-sam/Makefile.am b/daemons/ipa-sam/Makefile.am</span>
-<span class="gh">index ea14661..17d77aa 100644</span>
-<span class="gd">--- a/daemons/ipa-sam/Makefile.am</span>
-<span class="gi">+++ b/daemons/ipa-sam/Makefile.am</span>
-<span class="gu">@@ -7,7 +7,7 @@ SAMBA40EXTRA_LIBS = $(SAMBA40EXTRA_LIBPATH) \</span>
-            $(NULL)
+<span class="w"> </span>if HAVE_CMOCKA<span class="w"></span>
+<span class="gu">@@ -71,7 +71,6 @@ ipa_kdb_tests_SOURCES =        \</span><span class="w"></span>
+<span class="w"> </span>       ipa_kdb_mspac.c         \<span class="w"></span>
+<span class="w"> </span>       ipa_kdb_delegation.c    \<span class="w"></span>
+<span class="w"> </span>       ipa_kdb_audit_as.c      \<span class="w"></span>
+<span class="gd">-       $(KRB5_UTIL_SRCS)       \</span><span class="w"></span>
+<span class="w"> </span>       $(NULL)<span class="w"></span>
+<span class="w"> </span>ipa_kdb_tests_CFLAGS = $(CMOCKA_CFLAGS)<span class="w"></span>
+<span class="w"> </span>ipa_kdb_tests_LDADD =          \<span class="w"></span>
+<span class="gu">@@ -81,6 +80,7 @@ ipa_kdb_tests_LDADD =          \</span><span class="w"></span>
+<span class="w"> </span>       $(NDRPAC_LIBS)          \<span class="w"></span>
+<span class="w"> </span>       $(UNISTRING_LIBS)       \<span class="w"></span>
+<span class="w"> </span>       $(NSS_LIBS)             \<span class="w"></span>
+<span class="gi">+       $(KRB5_UTIL_LIBS)       \</span><span class="w"></span>
+<span class="w"> </span>       -lkdb5                  \<span class="w"></span>
+<span class="w"> </span>       -lsss_idmap             \<span class="w"></span>
+<span class="w"> </span>       $(NULL)<span class="w"></span>
+<span class="gh">diff --git a/daemons/ipa-sam/Makefile.am b/daemons/ipa-sam/Makefile.am</span><span class="w"></span>
+<span class="gh">index ea14661..17d77aa 100644</span><span class="w"></span>
+<span class="gd">--- a/daemons/ipa-sam/Makefile.am</span><span class="w"></span>
+<span class="gi">+++ b/daemons/ipa-sam/Makefile.am</span><span class="w"></span>
+<span class="gu">@@ -7,7 +7,7 @@ SAMBA40EXTRA_LIBS = $(SAMBA40EXTRA_LIBPATH) \</span><span class="w"></span>
+<span class="w"> </span>           $(NULL)<span class="w"></span>
 
- KRB5_UTIL_DIR=../../util
-<span class="gd">-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c</span>
-<span class="gi">+KRB5_UTIL_LIBS=../../util/ipa_krb5.la ../../util/ipa_pwd_ntlm.la</span>
- ASN1_UTIL_DIR=../../asn1
+<span class="w"> </span>KRB5_UTIL_DIR=../../util<span class="w"></span>
+<span class="gd">-KRB5_UTIL_SRCS=$(KRB5_UTIL_DIR)/ipa_krb5.c $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c</span><span class="w"></span>
+<span class="gi">+KRB5_UTIL_LIBS=../../util/ipa_krb5.la ../../util/ipa_pwd_ntlm.la</span><span class="w"></span>
+<span class="w"> </span>ASN1_UTIL_DIR=../../asn1<span class="w"></span>
 
- AM_CPPFLAGS =                      \
-<span class="gu">@@ -39,7 +39,6 @@ plugin_LTLIBRARIES =      \</span>
+<span class="w"> </span>AM_CPPFLAGS =                      \<span class="w"></span>
+<span class="gu">@@ -39,7 +39,6 @@ plugin_LTLIBRARIES =      \</span><span class="w"></span>
 
- ipasam_la_SOURCES =        \
-    ipa_sam.c       \
-<span class="gd">-   $(KRB5_UTIL_SRCS)   \</span>
-    $(NULL)
+<span class="w"> </span>ipasam_la_SOURCES =        \<span class="w"></span>
+<span class="w"> </span>   ipa_sam.c       \<span class="w"></span>
+<span class="gd">-   $(KRB5_UTIL_SRCS)   \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
 
- ipasam_la_LDFLAGS =        \
-<span class="gu">@@ -57,6 +56,7 @@ ipasam_la_LIBADD =        \</span>
-    $(SAMBA40EXTRA_LIBS)    \
-    $(SSSIDMAP_LIBS)    \
-    $(ASN1_UTIL_DIR)/libipaasn1.la  \
-<span class="gi">+   $(KRB5_UTIL_LIBS)   \</span>
-    $(NULL)
+<span class="w"> </span>ipasam_la_LDFLAGS =        \<span class="w"></span>
+<span class="gu">@@ -57,6 +56,7 @@ ipasam_la_LIBADD =        \</span><span class="w"></span>
+<span class="w"> </span>   $(SAMBA40EXTRA_LIBS)    \<span class="w"></span>
+<span class="w"> </span>   $(SSSIDMAP_LIBS)    \<span class="w"></span>
+<span class="w"> </span>   $(ASN1_UTIL_DIR)/libipaasn1.la  \<span class="w"></span>
+<span class="gi">+   $(KRB5_UTIL_LIBS)   \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
 
- EXTRA_DIST =           \
-<span class="gh">diff --git a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span>
-<span class="gh">index 46a6491..50c9c66 100644</span>
-<span class="gd">--- a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span>
-<span class="gi">+++ b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span>
-<span class="gu">@@ -3,9 +3,9 @@ NULL =</span>
- MAINTAINERCLEANFILES = *~ Makefile.in
- PLUGIN_COMMON_DIR = ../common
- KRB5_UTIL_DIR = ../../../util
-<span class="gd">-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \</span>
-<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd.c \</span>
-<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c</span>
-<span class="gi">+KRB5_UTIL_LIBS = ../../../util/ipa_krb5.la \</span>
-<span class="gi">+        ../../../util/ipa_pwd.la \</span>
-<span class="gi">+        ../../../util/ipa_pwd_ntlm.la</span>
- ASN1_UTIL_DIR=../../../asn1
+<span class="w"> </span>EXTRA_DIST =           \<span class="w"></span>
+<span class="gh">diff --git a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span><span class="w"></span>
+<span class="gh">index 46a6491..50c9c66 100644</span><span class="w"></span>
+<span class="gd">--- a/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span><span class="w"></span>
+<span class="gi">+++ b/daemons/ipa-slapi-plugins/ipa-pwd-extop/Makefile.am</span><span class="w"></span>
+<span class="gu">@@ -3,9 +3,9 @@ NULL =</span><span class="w"></span>
+<span class="w"> </span>MAINTAINERCLEANFILES = *~ Makefile.in<span class="w"></span>
+<span class="w"> </span>PLUGIN_COMMON_DIR = ../common<span class="w"></span>
+<span class="w"> </span>KRB5_UTIL_DIR = ../../../util<span class="w"></span>
+<span class="gd">-KRB5_UTIL_SRCS = $(KRB5_UTIL_DIR)/ipa_krb5.c \</span><span class="w"></span>
+<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd.c \</span><span class="w"></span>
+<span class="gd">-        $(KRB5_UTIL_DIR)/ipa_pwd_ntlm.c</span><span class="w"></span>
+<span class="gi">+KRB5_UTIL_LIBS = ../../../util/ipa_krb5.la \</span><span class="w"></span>
+<span class="gi">+        ../../../util/ipa_pwd.la \</span><span class="w"></span>
+<span class="gi">+        ../../../util/ipa_pwd_ntlm.la</span><span class="w"></span>
+<span class="w"> </span>ASN1_UTIL_DIR=../../../asn1<span class="w"></span>
 
- AM_CPPFLAGS =                          \
-<span class="gu">@@ -41,6 +41,7 @@ plugin_LTLIBRARIES = libipa_pwd_extop.la</span>
- libipa_pwd_extop_la_LIBADD  = \
-    $(builddir)/../libotp/libotp.la \
-    $(ASN1_UTIL_DIR)/libipaasn1.la  \
-<span class="gi">+   $(KRB5_UTIL_LIBS)       \</span>
-    $(NULL)
- libipa_pwd_extop_la_SOURCES =      \
-    common.c            \
-<span class="gu">@@ -48,7 +49,6 @@ libipa_pwd_extop_la_SOURCES =         \</span>
-    prepost.c           \
-    ipa_pwd_extop.c         \
-    otpctrl.c           \
-<span class="gd">-   $(KRB5_UTIL_SRCS)       \</span>
-    $(NULL)
+<span class="w"> </span>AM_CPPFLAGS =                          \<span class="w"></span>
+<span class="gu">@@ -41,6 +41,7 @@ plugin_LTLIBRARIES = libipa_pwd_extop.la</span><span class="w"></span>
+<span class="w"> </span>libipa_pwd_extop_la_LIBADD  = \<span class="w"></span>
+<span class="w"> </span>   $(builddir)/../libotp/libotp.la \<span class="w"></span>
+<span class="w"> </span>   $(ASN1_UTIL_DIR)/libipaasn1.la  \<span class="w"></span>
+<span class="gi">+   $(KRB5_UTIL_LIBS)       \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
+<span class="w"> </span>libipa_pwd_extop_la_SOURCES =      \<span class="w"></span>
+<span class="w"> </span>   common.c            \<span class="w"></span>
+<span class="gu">@@ -48,7 +49,6 @@ libipa_pwd_extop_la_SOURCES =         \</span><span class="w"></span>
+<span class="w"> </span>   prepost.c           \<span class="w"></span>
+<span class="w"> </span>   ipa_pwd_extop.c         \<span class="w"></span>
+<span class="w"> </span>   otpctrl.c           \<span class="w"></span>
+<span class="gd">-   $(KRB5_UTIL_SRCS)       \</span><span class="w"></span>
+<span class="w"> </span>   $(NULL)<span class="w"></span>
 
- appdir = $(IPA_DATA_DIR)
-<span class="gh">diff --git a/util/Makefile.am b/util/Makefile.am</span>
-new file mode 100644
-<span class="gh">index 0000000..a848a7c</span>
-<span class="gd">--- /dev/null</span>
-<span class="gi">+++ b/util/Makefile.am</span>
-<span class="gu">@@ -0,0 +1,8 @@</span>
-<span class="gi">+#AM_CPPFLAGS = -I../util -Iasn1c</span>
-<span class="gi">+</span>
-<span class="gi">+noinst_LTLIBRARIES=libipa_krb5.la libipa_pwd.la libipa_pwd_ntlm.la</span>
-<span class="gi">+noinst_HEADERS=ipa_krb5.h ipa_mspac.h ipa_pwd.h</span>
-<span class="gi">+</span>
-<span class="gi">+libipa_krb5_la_SOURCES=ipa_krb5.c</span>
-<span class="gi">+libipa_pwd_la_SOURCES=ipa_pwd.c</span>
-<span class="gi">+libipa_pwd_ntlm_la_SOURCES=ipa_pwd_ntlm.c</span>
-</pre></div>
-
+<span class="w"> </span>appdir = $(IPA_DATA_DIR)<span class="w"></span>
+<span class="gh">diff --git a/util/Makefile.am b/util/Makefile.am</span><span class="w"></span>
+<span class="w">new file mode 100644</span>
+<span class="gh">index 0000000..a848a7c</span><span class="w"></span>
+<span class="gd">--- /dev/null</span><span class="w"></span>
+<span class="gi">+++ b/util/Makefile.am</span><span class="w"></span>
+<span class="gu">@@ -0,0 +1,8 @@</span><span class="w"></span>
+<span class="gi">+#AM_CPPFLAGS = -I../util -Iasn1c</span><span class="w"></span>
+<span class="gi">+</span><span class="w"></span>
+<span class="gi">+noinst_LTLIBRARIES=libipa_krb5.la libipa_pwd.la libipa_pwd_ntlm.la</span><span class="w"></span>
+<span class="gi">+noinst_HEADERS=ipa_krb5.h ipa_mspac.h ipa_pwd.h</span><span class="w"></span>
+<span class="gi">+</span><span class="w"></span>
+<span class="gi">+libipa_krb5_la_SOURCES=ipa_krb5.c</span><span class="w"></span>
+<span class="gi">+libipa_pwd_la_SOURCES=ipa_pwd.c</span><span class="w"></span>
+<span class="gi">+libipa_pwd_ntlm_la_SOURCES=ipa_pwd_ntlm.c</span><span class="w"></span>
+</code></pre></div>
 
 <p>But this ends badly too:</p>
-<div class="highlight"><pre><span></span>make[2]: Entering directory &#39;/home/blipton/src/freeipa/rpmbuild/BUILD/freeipa-4.3.90.201606132126GIT475c6bc/util&#39;
+<div class="highlight"><pre><span></span><code>make[2]: Entering directory &#39;/home/blipton/src/freeipa/rpmbuild/BUILD/freeipa-4.3.90.201606132126GIT475c6bc/util&#39;
 cd ../.. &amp;&amp; make  am--refresh
-</pre></div>
-
+</code></pre></div>
 
 <p>Notice that make is trying to change to a directory outside of the build
 directory. No surprise that it doesn't find a Makefile there. What's going on?</p>
 <p>The <code>cd</code> is triggered by one of several makefile lines that run</p>
-<div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="k">$(</span>top_builddir<span class="k">)</span> <span class="o">&amp;&amp;</span> <span class="k">$(</span>MAKE<span class="k">)</span> <span class="k">$(</span>AM_MAKEFLAGS<span class="k">)</span> am--refresh
-</pre></div>
-
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span> <span class="k">$(</span>top_builddir<span class="k">)</span> <span class="o">&amp;&amp;</span> <span class="k">$(</span>MAKE<span class="k">)</span> <span class="k">$(</span>AM_MAKEFLAGS<span class="k">)</span> am--refresh
+</code></pre></div>
 
 <p>and in the same Makefile, <code>top_builddir</code> is defined to be <code>../..</code>. Since this
 build is actually taking place in the <code>client</code> subdirectory, the correct
 relative path would be <code>../client</code>. But if we look at the code in
 config.status, we see:</p>
-<div class="highlight"><pre><span></span><span class="nv">ac_dir_suffix</span><span class="o">=</span>/<span class="sb">`</span><span class="nv">$as_echo</span> <span class="s2">&quot;</span><span class="nv">$ac_dir</span><span class="s2">&quot;</span> <span class="p">|</span> sed <span class="s1">&#39;s|^\.[\\/]||&#39;</span><span class="sb">`</span>
+<div class="highlight"><pre><span></span><code><span class="nv">ac_dir_suffix</span><span class="o">=</span>/<span class="sb">`</span><span class="nv">$as_echo</span> <span class="s2">&quot;</span><span class="nv">$ac_dir</span><span class="s2">&quot;</span> <span class="p">|</span> sed <span class="s1">&#39;s|^\.[\\/]||&#39;</span><span class="sb">`</span>
 <span class="c1"># A &quot;..&quot; for each directory in $ac_dir_suffix.</span>
 <span class="nv">ac_top_builddir_sub</span><span class="o">=</span><span class="sb">`</span><span class="nv">$as_echo</span> <span class="s2">&quot;</span><span class="nv">$ac_dir_suffix</span><span class="s2">&quot;</span> <span class="p">|</span> sed <span class="s1">&#39;s|/[^\\/]*|/..|g;s|/||&#39;</span><span class="sb">`</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>As the comment says, this looks at the relative path from the configure script
 to the Makefile (in this case <code>../util/Makefile</code>), and replaces each directory
