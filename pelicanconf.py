@@ -8,7 +8,7 @@ SITEURL = 'http://blog.benjaminlipton.com'
 
 PATH = 'content'
 
-STATIC_PATHS = ['images', 'extra/CNAME']
+STATIC_PATHS = ['extra/CNAME']
 EXTRA_PATH_METADATA = {'extra/CNAME': {'path': 'CNAME'}}
 
 TIMEZONE = 'America/New_York'
