@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.10"
 pelican = "^4.8.0"
 markdown = "^3.4.1"
+ghp-import = "^2.1.0"
 
 
 [build-system]
