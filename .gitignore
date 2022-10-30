@@ -7,3 +7,4 @@ Gemfile.lock
 # Pelican
 /*.pid
 /output/
+__pycache__
