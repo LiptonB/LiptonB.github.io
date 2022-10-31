@@ -1,6 +1,6 @@
 Title: Building a Custom Bootable USB to Install Debian over SSH
 Category: system administration
-Tags: Debian
+Tags: Debian, Linux
 
 [TOC]
 
