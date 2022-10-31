@@ -42,7 +42,7 @@ jobs:
           poetry install
       - name: Build with Pelican
         run: |
-          make publish
+          poetry run make publish
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
